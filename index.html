@@ -3,108 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Müllbüachle Register</title>
+    <title>Müllbüachle Archiv</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-main: #f5f5f5;
-            --text-sub: #909090;
-            --border: #2d2d2d;
-        }
-        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .view-section { width: 100%; max-width: 800px; }
-        .book-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
-        .book-header { padding: 15px 20px; font-weight: 700; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+        :root { --bg: #121212; --card: #1e1e1e; --text: #f5f5f5; --sub: #909090; --border: #333; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 800px; }
+        .book-section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .book-header { padding: 15px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; }
-        .clickable-row { cursor: pointer; }
-        .clickable-row:hover { background: rgba(255,255,255,0.05); }
-        td { padding: 12px 20px; border-top: 1px solid var(--border); }
-        .page-col { width: 80px; text-align: right; color: var(--text-sub); }
-        .preview-row { display: none; background: rgba(0,0,0,0.3); }
-        .preview-container { text-align: center; padding: 10px; }
-        .preview-container img { max-width: 100%; height: auto; border-radius: 4px; }
+        td { padding: 12px 15px; border-top: 1px solid var(--border); }
+        .page-col { text-align: right; color: var(--sub); width: 100px; }
+        .clickable { cursor: pointer; }
+        .clickable:hover { background: rgba(255,255,255,0.05); }
+        .preview-row { display: none; text-align: center; background: #000; }
+        .preview-row img { max-width: 100%; height: auto; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-    <div id="contentArea" class="view-section"></div>
+<div class="container" id="app"></div>
 
-    <script>
-        // Dein Daten-Array
-        const data = [
-            // ... (Hier kommen deine Daten-Einträge wie bisher)
-            { year: 2025, book: "Buch 1: März - Juli", id: "buch1", text: "Taschenrechner #FlatzMuseum", page: "3" },
-            { year: 2025, book: "Buch 2: Juli - Sept", id: "buch2", text: "\"Talentekinder\" Nachricht", page: "54" }
-            // HINWEIS: Füge hier alle anderen Einträge ein
-        ];
+<script>
+// Komplette Daten aus deiner inhalt.txt
+const data = [
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Eintrittskarte #FlatzMuseum #Dornbirn #Zeichnung", page: "5" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Knife Block", page: "10" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Aufhängeplan YAG", page: "11" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Flug: Dehli -> Abu Dhabi #Ticket", page: "38" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Fredi 60er #Zeichnung #Sketchbook", page: "60" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Sketchbook Day 001 #Zeichnung #Sketchbook", page: "65" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Wookrock Festival, Stand mit Tobi #Zirkus", page: "66" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Theoriekurs #Easydrivers #Auto", page: "96" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "\"Talentekinder\" Nachricht von Alfons #Brief", page: "54" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "An der Ach mit #Helene #Zeichnung #Sketchbook", page: "73" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "Arschkarte bei Otto am 21. Geburtstag #Zettel", page: "90" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "Auto Beleuchtung VW Golf #Easydrivers #Auto", page: "95" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "#Opa&Oma Garten #Zeichnung #Sketchbook", page: "98" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "Tutti Frutti Box #Zeichnung #Blueprint", page: "102" },
+    { id: "buch2", book: "Buch 2: Juli-September 25", text: "Museumsbesuch mit #Papa in #Basel", page: "122" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Fashion #Zeichnung #Sketchbook", page: "7" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Tic-Tac-Toe mit #Flo, #Finja & #Leonie", page: "11" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Ultimate Tic-Tac-Toe mit #Flo", page: "13" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Ultimate Tic-Tac-Toe #Anleitung #Spiel", page: "17" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "VS Fischbach Eröffnungskonferenz", page: "18" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Hut #Zeichnung #Sketchbook", page: "34" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "erste Arbeitswoche #Fischbach #fsj", page: "35" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Spaniqué", page: "41" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "erster & zweiter Stock #Zeichnung", page: "51" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Keller #Manu #Otto #Greta #Zeichnung", page: "65" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Wer bisch du? #fsj #Fischbach", page: "74" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "OP-Saal #Zeichnung #Sketchbook", page: "81" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Hand #Zeichnung #Sketchbook", page: "90" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Mathe 101 #fsj", page: "97" },
+    { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Opas Brille #Opa&Oma #Zeichnung", page: "103" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "\"Schneller Lauf\" #Aufführung", page: "11" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Sketchbook Day 100", page: "11" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "erster Solo-Trip nach #Wien", page: "17" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "A&O zum Auto #Easydrivers", page: "36" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Paul Koch #fsj #SBOV #Kurs", page: "41" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "vorläufiger Führerschein #Zettel", page: "47" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Kreisverkehr Messepark #Auto", page: "48" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "4x4 Rubik's Master #SolutionGuide", page: "52" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Korg Volca Sample 2 #Korg", page: "57" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "\"Diabolo-Chaos\" #Zirkus #Zeichnung", page: "61" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "zweite Konferenz #fsj", page: "64" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Paul Koch 2 #fsj #SBOV", page: "76" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "\"Panda-Pan\" vo Aris #fsj #Zettel", page: "80" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Fridolin Maturaball #Ticket", page: "86" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Schneeflocke vo Emma #fsj #Zettel", page: "90" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "PH Feldkirch Exkursion #fsj", page: "99" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Zeichnung vo Lina #fsj #Zettel", page: "105" },
+    { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Weihnachten Zirkushalle #Zirkus", page: "112" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Korg Volca Sample 2 - Factory Samples", page: "5" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Rubik's Pyraminx #SolutionGuide", page: "8" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Spitzenschachtel für #Mademoiselle", page: "35" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Umgang mit Aggression 1 #fsj #Mitschrift", page: "49" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Arbeit mit Menschen mit Beeinträchtigung 1", page: "53" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Clownerie Faschingsnummer mit #Edith", page: "67" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Umgang mit Aggression 2", page: "69" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "FH Dornbirn #fsj #SBOV", page: "73" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Sockenpuppe #fsj #Zeichnung", page: "88" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Semesterkonferenz VS Fischbach", page: "96" },
+    { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Sketchbook Day 200", page: "113" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Tanger", page: "1" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Faschingsdienstag mit #Edith #Zirkus", page: "2" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Fridolin 18 #Film", page: "57" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Sockenpuppe #fsj #Anleitung", page: "67" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Video zusammenfügen #Film", page: "68" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Lesen mit 1c #fsj", page: "70" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Nachricht von WirHoch4 #Zettel", page: "79" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "\"Unterschrift\" Levian (4b) #Zettel", page: "84" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Flug: Tanger -> Memmingen #Ticket", page: "88" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "\"I Magnum\" #Zeichnung", page: "91" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Exkursion BGD #fsj #Dornbirn", page: "101" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Jonglieren? #fsj #Plan", page: "102" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "\"Lesende Lara (3b)\" #fsj #Zeichnung", page: "105" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "#Apple AirPods #Zeichnung", page: "109" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Jojos Flaschenbox #fsj #Zeichnung", page: "111" },
+    { id: "buch6", book: "Buch 6: Feb-März 26", text: "Hospiz Vlbg #fsj #Mitschrift", page: "116" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Malbuch vo Lara #fsj #Geschenk", page: "4" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "musikalische Mittagspause #Ticket", page: "14" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Schwein #fsj #Zeichnung", page: "18" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "#Bobby #Zeichnung", page: "21" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Leopard #Zeichnung", page: "27" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Shao Kao mit #Opa&Oma #Glückskeks", page: "32" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Kinobesuch mit #Flo #Ticket", page: "33" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Berg #Zeichnung", page: "41" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Ölwechsel #Golf #Auto", page: "45" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Mathe Aufgabe 4b #fsj #Zettel", page: "49" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Berge malen mit Kuli #Zeichnung", page: "52" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Austria Ski Tag #Ticket", page: "64" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Regenschirm 3b #fsj #Zeichnung", page: "70" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Landschaft #Zeichnung", page: "79" },
+    { id: "buch7", book: "Buch 7: März-Mai 26", text: "Boot von Lara 3b #fsj #Zeichnung", page: "91" }
+];
 
-        // Definiere hier, für welche Seite ein Bild existiert
-        const bildListen = {
-            buch1: ['3', '5', '10', '11'],
-            buch2: ['54', '73', '90']
-            // HINWEIS: Ergänze hier alle Seiten, für die du im Ordner "bilder" ein .jpg hast
-        };
+const available = {
+    buch1: ["3", "5", "10", "11", "38", "60", "65", "66"],
+    buch2: ["54", "73", "90", "98", "102"],
+    buch3: ["7", "11", "13", "17", "18", "34", "35", "41", "51", "65", "74", "81", "90", "97", "103"],
+    buch4: ["11", "17", "36", "41", "47", "48", "52", "57", "60", "61", "64", "76", "79", "80", "83", "86", "90", "96", "99", "105", "112", "115"],
+    buch5: ["5", "8", "35", "49", "53", "67", "69", "73", "88", "96", "113"],
+    buch6: ["1", "2", "57", "67", "68", "70", "79", "84", "88", "91", "101", "102", "105", "109", "111", "116"],
+    buch7: ["4", "14", "18", "21", "27", "32", "33", "41", "45", "49", "52", "64", "70", "79", "91"]
+};
 
-        // Die korrigierte Pfad-Logik für deine Ordnerstruktur
-        function versucheBildZuLaden(imgElement, buchId, bildNummer) {
-            // Pfad-Struktur: ./buch1/bilder/3.jpg
-            const pfad = `./${buchId}/bilder/${bildNummer}.jpg`;
-            imgElement.src = pfad;
-            imgElement.onerror = function() {
-                this.style.display = 'none'; // Bild ausblenden, falls Datei nicht existiert
-            };
-        }
+function toggle(id) {
+    const row = document.getElementById('prev-' + id);
+    row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+}
 
-        function toggleBildVorschau(rowId, buchId, bildNummer) {
-            const previewRow = document.getElementById(`preview-${rowId}`);
-            if (previewRow.style.display === 'table-row') {
-                previewRow.style.display = 'none';
-            } else {
-                document.querySelectorAll('.preview-row').forEach(r => r.style.display = 'none');
-                const wrapper = document.getElementById(`wrapper-${rowId}`);
-                wrapper.innerHTML = `<div class="preview-container"><img src="" alt="Seite ${bildNummer}"></div>`;
-                versucheBildZuLaden(wrapper.querySelector('img'), buchId, bildNummer);
-                previewRow.style.display = 'table-row';
-            }
-        }
+const app = document.getElementById('app');
+const bookIds = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
 
-        function render() {
-            const contentArea = document.getElementById('contentArea');
-            contentArea.innerHTML = "";
-            
-            // Gruppiere nach Büchern
-            const books = [...new Set(data.map(item => item.id))];
-            
-            books.forEach(bId => {
-                const bookData = data.filter(item => item.id === bId);
-                const section = document.createElement('div');
-                section.className = 'book-section';
-                section.innerHTML = `<div class="book-header">${bookData[0].book}</div><table><tbody></tbody></table>`;
-                const tbody = section.querySelector('tbody');
-
-                bookData.forEach((item, index) => {
-                    const rowId = `${bId}-${index}`;
-                    const hatBild = bildListen[bId] && bildListen[bId].includes(item.page);
-                    
-                    const row = document.createElement('tr');
-                    row.className = hatBild ? 'clickable-row' : '';
-                    if(hatBild) row.onclick = () => toggleBildVorschau(rowId, bId, item.page);
-                    
-                    row.innerHTML = `<td>${item.text} ${hatBild ? '🖼️' : ''}</td><td class="page-col">S. ${item.page}</td>`;
-                    tbody.appendChild(row);
-
-                    const preview = document.createElement('tr');
-                    preview.className = 'preview-row';
-                    preview.id = `preview-${rowId}`;
-                    preview.innerHTML = `<td colspan="2"><div id="wrapper-${rowId}"></div></td>`;
-                    tbody.appendChild(preview);
-                });
-                contentArea.appendChild(section);
-            });
-        }
-
-        render();
-    </script>
+bookIds.forEach(bId => {
+    const items = data.filter(i => i.id === bId);
+    if(items.length === 0) return;
+    
+    let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
+    items.forEach((item, idx) => {
+        const rowId = bId + idx;
+        const hasImg = available[bId] && available[bId].includes(item.page);
+        html += `<tr class="${hasImg ? 'clickable' : ''}" ${hasImg ? `onclick="toggle('${rowId}')"` : ''}>
+                    <td>${item.text} ${hasImg ? '🖼️' : ''}</td>
+                    <td class="page-col">S. ${item.page}</td>
+                 </tr>
+                 ${hasImg ? `<tr id="prev-${rowId}" class="preview-row"><td colspan="2"><img src="./${bId}/bilder/${item.page}.jpg" alt="Seite ${item.page}"></td></tr>` : ''}`;
+    });
+    html += `</table></div>`;
+    app.innerHTML += html;
+});
+</script>
 </body>
 </html>
