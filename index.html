@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <title>Müllbüachle Archiv</title>
+    <title>Müllbüachle Register</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -32,8 +32,8 @@
             margin-bottom: 20px;
         }
 
-        h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
-        .subtitle { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px; }
+        h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
+        .subtitle { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4; }
 
         .tabs {
             display: flex;
@@ -60,10 +60,14 @@
         .view-section { display: none; width: 100%; max-width: 800px; }
         .view-section.active { display: block; }
 
-        .search-container { width: 100%; margin-bottom: 25px; }
+        .search-container { 
+            position: relative;
+            width: 100%; 
+            margin-bottom: 25px; 
+        }
         #searchInput {
             width: 100%;
-            padding: 14px 20px;
+            padding: 14px 45px 14px 20px;
             border-radius: 8px;
             border: 1px solid var(--border);
             background-color: var(--card-bg);
@@ -71,6 +75,22 @@
             font-size: 1rem;
             outline: none;
             box-sizing: border-box;
+        }
+        .clear-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+            padding: 0;
+        }
+        .clear-search:hover {
+            color: var(--text-main);
         }
 
         .year-title { font-size: 1.4rem; font-weight: 700; margin: 30px 0 15px 0; }
@@ -131,8 +151,8 @@
 <body>
 
     <header>
-        <h1>Müllbüachle Register</h1>
-        <div class="subtitle">Leonard Loacker</div>
+        <h1>Müllbüachle Register | Leonard Loacker</h1>
+        <div class="subtitle">Falls gefunden [if found]: loaleo@gmx.at | Nägelesgarten 3 6850 Dornbirn, Österreich [Austria]</div>
     </header>
 
     <div class="tabs">
@@ -144,6 +164,7 @@
     <div id="registerView" class="view-section active">
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Nach Schlagwörtern oder #Hashtags suchen...">
+            <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()">&#x2715;</button>
         </div>
         <div id="contentArea"></div>
     </div>
@@ -156,17 +177,20 @@
     <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
     <script>
+        // Aktualisierte Liste basierend auf deinen neuen Vorgaben
         const data = [
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Taschenrechner #FlatzMuseum#Dornbirn#Zeichnung", page: "3" },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Eintrittskarte #FlatzMuseum#Dornbirn#Zeichnung", page: "5" },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Knife Block", page: "10" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Aufhängeplan YAG", page: "11-12" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Flug: Dehli -> Abu Dhabi #Ticket", page: "38" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Fredi 60er #Zeichnung#Sketchbook", page: "60" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Sketchbook Day 001 #Zeichnung#Sketchbook", page: "65" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Wookrock Festival, Stand mit Tobi #Zirkus", page: "66" },
-            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96" }
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96-122" }
         ];
 
-        // HIER NUR DIE SEITEN EINTRAGEN, DIE TATSÄCHLICH ALS BILD VORHANDEN SIND!
-        // Wenn du z.B. für Seite 11 und 38 ein Bild hast, für den Rest nicht, schreibst du hier: ['11', '38']
+        // Abgleich mit deinen tatsächlichen Dateinamen aus dem Screenshot image_9adc9f.png
         const buch1Bilder = ['3', '5', '10', '11', '38', '60', '65', '66']; 
 
         function switchTab(view) {
@@ -245,7 +269,7 @@
                         const rowId = `${buchId}-${uniqueID}-${index}`;
                         const ersteSeite = extrahiereErsteSeite(item.page);
                         
-                        // Prüft jetzt dynamisch, ob das Bild wirklich existiert
+                        // Prüft, ob das Bild wirklich im Array existiert
                         const hatBild = buch1Bilder.includes(ersteSeite);
                         
                         const rowClass = hatBild ? 'clickable-row' : '';
@@ -314,7 +338,22 @@
             });
         }
 
-        document.getElementById('searchInput').addEventListener('input', e => renderRegister(e.target.value));
+        // Steuerung fuer die Suchfunktion und den Loesch-Button
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+        searchInput.addEventListener('input', e => {
+            const value = e.target.value;
+            clearSearchBtn.style.display = value.length > 0 ? 'block' : 'none';
+            renderRegister(value);
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearSearchBtn.style.display = 'none';
+            renderRegister('');
+            searchInput.focus();
+        }
         
         renderRegister();
     </script>
