@@ -224,10 +224,10 @@
         <h2>Physisches Archiv via NFC-Link</h2>
         
         <div class="info-block">
-            <strong>Falls gefunden [IF FOUND]:</strong>
+            <strong>Falls gefunden:</strong>
             <div class="info-grid">
                 <div><span>📧</span> loaleo@gmx.at</div>
-                <div><span>📍</span> Nägelesgarten 3, 6850 Dornbirn, Österreich [Austria]</div>
+                <div><span>📍</span> Nägelesgarten 3, 6850 Dornbirn, Österreich</div>
             </div>
         </div>
     </header>
@@ -359,14 +359,15 @@
             { year: 2026, book: "Buch 7: März - Mai", id: "buch7", text: "Boot von Lara 3b #fsj #Fischbach #Zeichnung #Sketchbook", page: "91" }
         ];
 
+        // GLASKLARE EXPLICITE ZUORDNUNG: Direkt mit der echten Dateiendung der Festplatte hinterlegt
         const bildListen = {
-            buch1: ['3', '5', '10', '11', '38', '60', '65', '66', '96'],
-            buch2: ['54', '73', '90', '95', '98', '102', '122'],
-            buch3: ['7', '11', '13', '17', '18', '34', '35', '41', '51', '65', '74', '81', '90', '97', '103'],
-            buch4: ['11', '17', '36', '41', '47', '48', '52', '57', '61', '64', '76', '80', '86', '90', '99', '105', '112'],
-            buch5: ['5', '8', '35', '49', '53', '67', '69', '73', '88', '96', '113'],
-            buch6: ['1', '2', '57', '67', '68', '70', '79', '84', '88', '91', '101', '102', '105', '109', '111', '116'],
-            buch7: ['4', '14', '18', '21', '27', '32', '33', '41', '45', '49', '52', '64', '70', '79', '91']
+            buch1: ['3.PNG', '5.PNG', '10.PNG', '11.PNG', '38.PNG', '60.PNG', '65.PNG', '66.PNG', '96.PNG'],
+            buch2: ['54.PNG', '73.PNG', '90.PNG', '95.PNG', '98.PNG', '102.PNG', '122.PNG'],
+            buch3: ['7.PNG', '11.PNG', '13.PNG', '17.PNG', '18.PNG', '34.PNG', '35.PNG', '41.PNG', '51.PNG', '65.PNG', '74.PNG', '81.PNG', '90.PNG', '97.PNG', '103.PNG'],
+            buch4: ['11.PNG', '17.PNG', '36.PNG', '41.PNG', '47.PNG', '48.PNG', '52.PNG', '57.PNG', '61.PNG', '64.PNG', '76.PNG', '80.PNG', '86.PNG', '90.PNG', '99.PNG', '105.PNG', '112.PNG'],
+            buch5: ['5.PNG', '8.PNG', '35.PNG', '49.PNG', '53.PNG', '67.PNG', '69.PNG', '73.PNG', '88.PNG', '96.PNG', '113.PNG'],
+            buch6: ['1.PNG', '2.PNG', '57.PNG', '67.PNG', '68.PNG', '70.PNG', '79.PNG', '84.PNG', '88.PNG', '91.PNG', '101.PNG', '102.PNG', '105.PNG', '109.PNG', '111.PNG', '116.PNG'],
+            buch7: ['4.PNG', '14.PNG', '18.PNG', '21.PNG', '27.PNG', '32.PNG', '33.PNG', '41.PNG', '45.PNG', '49.PNG', '52.PNG', '64.PNG', '70.PNG', '79.PNG', '91.PNG']
         };
 
         const contentArea = document.getElementById('contentArea');
@@ -386,40 +387,24 @@
             }
         }
 
+        // Sucht präzise nach Übereinstimmungen ohne Verwechslungen durch Datum/Klasse
         function findeVorhandeneBilder(buchId, seitenString) {
             if (!bildListen[buchId]) return [];
             
-            const alleZahlenImText = String(seitenString).match(/\d+/g) || [];
+            const gesuchteSeitenTeile = String(seitenString).split(/[;,]/).map(s => s.trim());
             
-            return bildListen[buchId].filter(bildNummer => {
-                const num = parseInt(bildNummer);
+            return bildListen[buchId].filter(dateiname => {
+                const bildNummerText = dateiname.split('.')[0]; // Holt die "3" aus "3.PNG"
+                const num = parseInt(bildNummerText);
                 
-                if (alleZahlenImText.map(n => parseInt(n)).includes(num)) return true;
-                
-                return String(seitenString).split(/[;,]/).some(part => {
+                return gesuchteSeitenTeile.some(part => {
                     if (part.includes('-')) {
                         const [start, end] = part.split('-').map(n => parseInt(n.trim()));
                         return num >= start && num <= end;
                     }
-                    return false;
+                    return part === bildNummerText;
                 });
             });
-        }
-
-        // NEU & SMARTER: Versucht nacheinander .jpg, .PNG, .png und .JPG zu laden
-        function setupFallbackMechanismus(imgElement, buchId, bildNummer) {
-            const extensions = ['.jpg', '.PNG', '.png', '.JPG'];
-            let currentIdx = 0;
-
-            imgElement.onerror = function() {
-                currentIdx++;
-                if (currentIdx < extensions.length) {
-                    this.src = `${buchId}/${bildNummer}${extensions[currentIdx]}`;
-                } else {
-                    this.onerror = null; // Stoppt Endlosschleife, falls Bild wirklich fehlt
-                    this.style.display = 'none'; 
-                }
-            };
         }
 
         function toggleBildVorschau(rowId, buchId, gefundeneBilder) {
@@ -436,19 +421,18 @@
             const wrapper = document.getElementById(`wrapper-${rowId}`);
             wrapper.innerHTML = "";
 
-            gefundeneBilder.forEach(bildNummer => {
+            gefundeneBilder.forEach(dateiname => {
                 const container = document.createElement('div');
                 container.className = 'preview-container';
                 
                 const img = document.createElement('img');
-                setupFallbackMechanismus(img, buchId, bildNummer);
-                img.src = `${buchId}/${bildNummer}.jpg`; // Erster Versuch
-                img.alt = `S. ${bildNummer}`;
+                img.src = `${buchId}/${dateiname}`;
+                img.alt = `Seite ${dateiname.split('.')[0]}`;
                 img.loading = "lazy";
 
                 const label = document.createElement('div');
                 label.className = 'image-label';
-                label.innerText = `Seite ${bildNummer}`;
+                label.innerText = `Seite ${dateiname.split('.')[0]}`;
 
                 container.appendChild(img);
                 container.appendChild(label);
@@ -528,14 +512,13 @@
 
             bookOrder.forEach(buchId => {
                 if (!bildListen[buchId]) return;
-                bildListen[buchId].forEach(bildNummer => {
+                bildListen[buchId].forEach(dateiname => {
                     const container = document.createElement('div');
                     container.className = 'gallery-item';
                     
                     const img = document.createElement('img');
-                    setupFallbackMechanismus(img, buchId, bildNummer);
                     img.loading = "lazy";
-                    img.src = `${buchId}/${bildNummer}.jpg`; // Erster Versuch
+                    img.src = `${buchId}/${dateiname}`;
 
                     container.appendChild(img);
                     
