@@ -33,7 +33,6 @@
             margin-bottom: 25px;
         }
 
-        /* Hierarchische Überschriften-Struktur */
         h1 { 
             font-size: 2rem; 
             font-weight: 800; 
@@ -47,7 +46,6 @@
             margin: 0 0 20px 0; 
         }
 
-        /* Kompakter Info-Block */
         .info-block {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border);
@@ -153,7 +151,7 @@
         tr.clickable-row:hover { background: rgba(255,255,255,0.03); }
         
         td { padding: 12px 20px; font-size: 0.95rem; word-wrap: break-word; }
-        .page-col { width: 75px; font-weight: 600; text-align: right; color: var(--text-sub); white-space: nowrap; }
+        .page-col { width: 85px; font-weight: 600; text-align: right; color: var(--text-sub); white-space: nowrap; }
 
         .preview-row { display: none; background: rgba(0,0,0,0.2); border-top: none !important; }
         .preview-row td { padding: 10px 5px !important; }
@@ -259,7 +257,9 @@
     <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
     <script>
+        // Vollständiger Datensatz für Buch 1, Buch 2 und Buch 3
         const data = [
+            // Buch 1
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Taschenrechner #FlatzMuseum#Dornbirn#Zeichnung", page: "3" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Eintrittskarte #FlatzMuseum#Dornbirn#Zeichnung", page: "5" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Knife Block", page: "10" },
@@ -268,9 +268,36 @@
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Fredi 60er #Zeichnung#Sketchbook", page: "60" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Sketchbook Day 001 #Zeichnung#Sketchbook", page: "65" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Wookrock Festival, Stand mit Tobi #Zirkus", page: "66" },
-            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96-122" }
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96-122" },
+
+            // Buch 2
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "\"Talentekinder\" Nachricht von Alfons #Brief", page: "54" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "An der Ach mit #Helene #Zeichnung #Sketchbook", page: "73" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "Arschkarte bei Otto am 21. Geburtstag #Zettel", page: "90" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "Auto Beleuchtung und Sonstiges am VW Golf #Easydrivers #Auto", page: "95-97" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "#Opa&Oma Garten #Zeichnung #Sketchbook", page: "98" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "Tutti Frutti Box #Zeichnung #Blueprint", page: "102, 103" },
+            { year: 2025, bDe: "Buch 2", id: "buch2", de: "Museumsbesuch mit #Papa in #Basel", page: "122" },
+
+            // Buch 3
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Fashion #Zeichnung #Sketchbook", page: "7" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Tic-Tac-Toe mit #Flo, #Finja & #Leonie; #Zirkus", page: "11" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Ultimate Tic-Tac-Toe mit #Flo", page: "13" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Ultimate Tic-Tac-Toe #Anleitung #Spiel", page: "17" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "VS Fischbach Eröffnungskonferenz #Konferenz #Fischbach #fsj", page: "18-22" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Hut #Zeichnung #Sketchbook", page: "34" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "erste Arbeitswoche #Fischbach #fsj", page: "35" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Spaniqué", page: "41-47; 54" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "erster & zweiter Stock #Zeichnung #Blueprint #Fischbach #fsj", page: "51, 52" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Keller #Manu #Otto #Greta #Zeichnung #Sketchbook", page: "65" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Wer bisch du? #fsj #Fischbach", page: "74" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "OP-Saal #Zeichnung #Sketchbook", page: "81" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Hand #Zeichnung #Sketchbook", page: "90" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Mathe 101 #fsj #Fischbach", page: "97" },
+            { year: 2025, bDe: "Buch 3", id: "buch3", de: "Opas Brille #Opa&Oma #Zeichnung #Sketchbook", page: "103" }
         ];
 
+        // Definierte Bilddateien für Buch 1 (basierend auf deinen Scans)
         const buch1Bilder = ['3', '5', '10', '11', '38', '60', '65', '66']; 
 
         function switchTab(view) {
@@ -287,8 +314,17 @@
             }
         }
 
+        // Filtert Sonderzeichen wie Bindestriche, Kommas oder Semikolons heraus, um die erste Seitenzahl zu erhalten
         function extrahiereErsteSeite(seiteString) {
             return String(seiteString).split(/[-;,]/)[0].trim();
+        }
+
+        function hatEintragBild(buchId, ersteSeite) {
+            if (buchId === 'buch1') {
+                return buch1Bilder.includes(ersteSeite);
+            }
+            // Für Buch 2 und Buch 3 wird standardmäßig true angenommen (außer bei dem Theoriekurs-Ausreißer in Buch 1)
+            return true;
         }
 
         function toggleBildVorschau(rowId, buchId, seiteString) {
@@ -304,12 +340,15 @@
             
             const imgElement = document.getElementById(`img-${rowId}`);
             const ersteSeite = extrahiereErsteSeite(seiteString);
+            const ordnerName = buchId.toLowerCase(); // Ordnerstruktur angepasst auf dynamisch 'buch1', 'buch2', 'buch3'
             
             imgElement.onerror = function() {
-                imgElement.src = `Buch1/bilder/${ersteSeite}.jpg`;
+                // Fallback-Versuch bei Schreibweisen-Abweichungen (z.B. großgeschriebene Ordner)
+                const schoenerOrdner = ordnerName.charAt(0).toUpperCase() + ordnerName.slice(1);
+                imgElement.src = `${schoenerOrdner}/bilder/${ersteSeite}.jpg`;
                 imgElement.onerror = null; 
             };
-            imgElement.src = `buch1/bilder/${ersteSeite}.jpg`;
+            imgElement.src = `${ordnerName}/bilder/${ersteSeite}.jpg`;
             
             previewRow.style.display = 'table-row';
         }
@@ -330,6 +369,8 @@
                 yearSection.innerHTML = `<div class="year-title">${year}</div>`;
                 
                 const yearData = filtered.filter(item => item.year === year);
+                
+                // Gruppierung nach exaktem Buchnamen
                 const bookGroups = yearData.reduce((acc, item) => {
                     if (!acc[item.bDe]) acc[item.bDe] = [];
                     acc[item.bDe].push(item);
@@ -342,13 +383,13 @@
                     const section = document.createElement('div');
                     section.className = 'book-section';
                     
-                    const item = bookGroups[bookName][0];
-                    const buchId = item.id;
+                    const firstItem = bookGroups[bookName][0];
+                    const buchId = firstItem.id;
 
                     let rows = bookGroups[bookName].map((item, index) => {
                         const rowId = `${buchId}-${uniqueID}-${index}`;
                         const ersteSeite = extrahiereErsteSeite(item.page);
-                        const hatBild = buch1Bilder.includes(ersteSeite);
+                        const hatBild = hatEintragBild(buchId, ersteSeite);
                         
                         const rowClass = hatBild ? 'clickable-row' : '';
                         const clickHandler = hatBild ? `onclick="toggleBildVorschau('${rowId}', '${buchId}', '${item.page}')"` : '';
@@ -387,32 +428,41 @@
             const grid = document.getElementById('galleryGrid');
             grid.innerHTML = "";
 
-            buch1Bilder.forEach(bildNummer => {
-                const item = document.createElement('div');
-                item.className = 'gallery-item';
+            // Baut die Gesamtgalerie dynamisch aus allen Einträgen auf, die ein Bild besitzen
+            data.forEach(item => {
+                const ersteSeite = extrahiereErsteSeite(item.page);
+                if (!hatEintragBild(item.id, ersteSeite)) return;
+
+                const ordnerName = item.id.toLowerCase();
+                const bildNummer = ersteSeite;
+
+                const container = document.createElement('div');
+                container.className = 'gallery-item';
                 
                 const img = document.createElement('img');
                 img.loading = "lazy";
-                img.alt = `Skizze S. ${bildNummer}`;
+                img.alt = `${item.bDe} S. ${bildNummer}`;
                 
                 img.onerror = function() {
-                    img.src = `Buch1/bilder/${bildNummer}.jpg`;
+                    const schoenerOrdner = ordnerName.charAt(0).toUpperCase() + ordnerName.slice(1);
+                    img.src = `${schoenerOrdner}/bilder/${bildNummer}.jpg`;
                     img.onerror = null;
                 };
-                img.src = `buch1/bilder/${bildNummer}.jpg`;
+                img.src = `${ordnerName}/bilder/${bildNummer}.jpg`;
 
-                item.appendChild(img);
+                container.appendChild(img);
                 
                 const badge = document.createElement('div');
                 badge.className = 'book-badge';
-                badge.innerText = "Band 1";
-                item.appendChild(badge);
+                // Kurzer Name für das Badge (z.B. "B. 1", "B. 2")
+                badge.innerText = item.id.replace('buch', 'Band ');
+                container.appendChild(badge);
 
-                item.onclick = () => {
+                container.onclick = () => {
                     window.open(img.src, '_blank');
                 };
                 
-                grid.appendChild(item);
+                grid.appendChild(container);
             });
         }
 
