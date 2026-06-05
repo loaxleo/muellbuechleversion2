@@ -359,15 +359,15 @@
             { year: 2026, book: "Buch 7: März - Mai", id: "buch7", text: "Boot von Lara 3b #fsj #Fischbach #Zeichnung #Sketchbook", page: "91" }
         ];
 
-        // Bildlisten haargenau abgeglichen mit deinen Screenshots
+        // Die Dateinamen exakt so angepasst wie sie im Dateisystem heißen (inklusive eventueller Nullen aus dem Screenshot)
         const bildListen = {
-            buch1: ['3', '5', '10', '11', '38', '60', '65', '66', '96'],
-            buch2: ['54', '73', '90', '95', '98', '102', '122'],
-            buch3: ['7', '11', '13', '17', '18', '34', '35', '41', '51', '65', '74', '81', '90', '97', '103'],
-            buch4: ['11', '17', '36', '41', '47', '48', '52', '57', '61', '64', '76', '80', '86', '90', '99', '105', '112'],
-            buch5: ['5', '8', '35', '49', '53', '67', '69', '73', '88', '96', '113'],
-            buch6: ['1', '2', '57', '67', '68', '70', '79', '84', '88', '91', '101', '102', '105', '109', '111', '116'],
-            buch7: ['4', '14', '18', '21', '27', '32', '33', '41', '45', '49', '52', '64', '70', '79', '91']
+            buch1: ['003', '005', '010', '011', '038', '060', '065', '066', '096'],
+            buch2: ['054', '073', '090', '095', '098', '102', '122'],
+            buch3: ['007', '011', '013', '017', '018', '034', '035', '041', '051', '065', '074', '081', '090', '097', '103'],
+            buch4: ['011', '017', '036', '041', '047', '048', '052', '057', '061', '064', '076', '080', '086', '090', '099', '105', '112'],
+            buch5: ['005', '008', '035', '049', '053', '067', '069', '073', '088', '096', '113'],
+            buch6: ['001', '002', '057', '067', '068', '070', '079', '084', '088', '091', '101', '102', '105', '109', '111', '116'],
+            buch7: ['004', '014', '018', '021', '027', '032', '033', '041', '045', '049', '052', '064', '070', '079', '091']
         };
 
         const contentArea = document.getElementById('contentArea');
@@ -382,4 +382,176 @@
                 document.getElementById('registerView').classList.add('active');
             } else {
                 document.getElementById('tabGallery').classList.add('active');
-                document.getElementById('galleryView').classList.add
+                document.getElementById('galleryView').classList.add('active');
+                rendereReineBildergalerie();
+            }
+        }
+
+        function findeVorhandeneBilder(buchId, seitenString) {
+            if (!bildListen[buchId]) return [];
+            
+            // Extrahiert alle Zahlensequenzen aus dem Text (z.B. "11" und "12" aus "11, 12")
+            const alleZahlen imText = String(seitenString).match(/\d+/g) || [];
+            
+            return bildListen[buchId].filter(bildNummer => {
+                // Konvertiert z.B. "003" zu 3 für den numerischen Abgleich
+                const num = parseInt(bildNummer);
+                
+                // Direkter Treffer, wenn die Zahl vorkommt (egal ob 3 oder 003)
+                if (alleZahlen imText.map(n => parseInt(n)).includes(num)) return true;
+                
+                // Abgleich bei Bindestrich-Spannen (z.B. 96-122)
+                return String(seitenString).split(/[;,]/).some(part => {
+                    if (part.includes('-')) {
+                        const [start, end] = part.split('-').map(n => parseInt(n.trim()));
+                        return num >= start && num <= end;
+                    }
+                    return false;
+                });
+            });
+        }
+
+        function toggleBildVorschau(rowId, buchId, gefundeneBilder) {
+            const previewRow = document.getElementById(`preview-${rowId}`);
+            if (!previewRow) return;
+
+            if (previewRow.style.display === 'table-row') {
+                previewRow.style.display = 'none';
+                return;
+            }
+
+            document.querySelectorAll('.preview-row').forEach(r => r.style.display = 'none');
+            
+            const wrapper = document.getElementById(`wrapper-${rowId}`);
+            wrapper.innerHTML = "";
+
+            gefundeneBilder.forEach(bildNummer => {
+                const container = document.createElement('div');
+                container.className = 'preview-container';
+                
+                const img = document.createElement('img');
+                // GEÄNDERT: Kein Unterordner "/bilder/" mehr, da direkt im Buch-Ordner liegend!
+                img.src = `${buchId}/${bildNummer}.jpg`;
+                img.alt = `S. ${bildNummer}`;
+                img.loading = "lazy";
+
+                const label = document.createElement('div');
+                label.className = 'image-label';
+                label.innerText = `Datei: ${bildNummer}.jpg`;
+
+                container.appendChild(img);
+                container.appendChild(label);
+                wrapper.appendChild(container);
+            });
+
+            previewRow.style.display = 'table-row';
+        }
+
+        function render(filter = "") {
+            contentArea.innerHTML = "";
+            const query = filter.toLowerCase().trim();
+
+            const filtered = data.filter(item => 
+                item.text.toLowerCase().includes(query) || 
+                item.book.toLowerCase().includes(query)
+            );
+
+            document.getElementById('noResults').style.display = filtered.length ? "none" : "block";
+
+            const years = [...new Set(filtered.map(item => item.year))].sort((a, b) => a - b);
+
+            years.forEach(year => {
+                const yearSection = document.createElement('div');
+                yearSection.className = 'year-section';
+                yearSection.innerHTML = `<div class="year-title">${year}</div>`;
+                
+                const yearData = filtered.filter(item => item.year === year);
+                const bookOrder = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
+                
+                bookOrder.forEach(bId => {
+                    const bookData = yearData.filter(item => item.id === bId);
+                    if (bookData.length === 0) return;
+
+                    const bookName = bookData[0].book;
+                    const section = document.createElement('div');
+                    section.className = 'book-section';
+
+                    const rows = bookData.map((item, index) => {
+                        const rowId = `${bId}-${index}`;
+                        const passendeBilder = findeVorhandeneBilder(bId, item.page);
+                        const hatBilder = passendeBilder.length > 0;
+                        
+                        const rowClass = hatBilder ? 'clickable-row' : '';
+                        const clickHandler = hatBilder ? `onclick='toggleBildVorschau("${rowId}", "${bId}", ${JSON.stringify(passendeBilder)})'` : '';
+                        const hinweis = hatBilder ? ' <span style="font-size:0.85rem;">🖼️</span>' : '';
+
+                        return `
+                            <tr class="${rowClass}" ${clickHandler}>
+                                <td>${item.text}${hinweis}</td>
+                                <td class="page-col">S. ${item.page}</td>
+                            </tr>
+                            <tr class="preview-row" id="preview-${rowId}">
+                                <td colspan="2">
+                                    <div class="preview-wrapper" id="wrapper-${rowId}"></div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    section.innerHTML = `
+                        <div class="book-header">${bookName}</div>
+                        <table><tbody>${rows}</tbody></table>
+                    `;
+                    yearSection.appendChild(section);
+                });
+
+                contentArea.appendChild(yearSection);
+            });
+        }
+
+        function rendereReineBildergalerie() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = "";
+
+            const bookOrder = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
+
+            bookOrder.forEach(buchId => {
+                if (!bildListen[buchId]) return;
+                bildListen[buchId].forEach(bildNummer => {
+                    const container = document.createElement('div');
+                    container.className = 'gallery-item';
+                    
+                    const img = document.createElement('img');
+                    img.loading = "lazy";
+                    // GEÄNDERT: Kein Unterordner "/bilder/" mehr!
+                    img.src = `${buchId}/${bildNummer}.jpg`;
+
+                    container.appendChild(img);
+                    
+                    const badge = document.createElement('div');
+                    badge.className = 'book-badge';
+                    badge.innerText = buchId.replace('buch', 'Band ');
+                    container.appendChild(badge);
+
+                    container.onclick = () => { window.open(img.src, '_blank'); };
+                    grid.appendChild(container);
+                });
+            });
+        }
+
+        searchInput.addEventListener('input', e => {
+            document.getElementById('clearSearchBtn').style.display = e.target.value.length > 0 ? 'block' : 'none';
+            render(e.target.value);
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            render('');
+            searchInput.focus();
+        }
+
+        render();
+    </script>
+</body>
+</html>
