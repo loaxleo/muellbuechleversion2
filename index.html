@@ -92,14 +92,15 @@
         }
         
         table { width: 100%; border-collapse: collapse; }
+        tr { border-top: 1px solid var(--border); }
+        tr:first-child { border-top: none; }
         tr.clickable-row { cursor: pointer; transition: background 0.1s; }
         tr.clickable-row:hover { background: rgba(255,255,255,0.03); }
         
-        td { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 0.95rem; }
-        tr:first-child td { border-top: none; }
+        td { padding: 12px 20px; font-size: 0.95rem; }
         .page-col { width: 90px; font-weight: 600; text-align: right; color: var(--text-sub); white-space: nowrap; }
 
-        .preview-row { display: none; background: rgba(0,0,0,0.2); }
+        .preview-row { display: none; background: rgba(0,0,0,0.2); border-top: none !important; }
         .preview-container { padding: 15px 20px; text-align: center; }
         .preview-container img { max-width: 100%; max-height: 500px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
 
@@ -131,7 +132,7 @@
 
     <header>
         <h1>Müllbüachle Register</h1>
-        <div class="subtitle">Physisches Archiv via NFC-Link</div>
+        <div class="subtitle">Leonard Loacker</div>
     </header>
 
     <div class="tabs">
@@ -155,7 +156,6 @@
     <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
     <script>
-        // Hier sind aktuell nur die Eintraege fuer Buch 1 aktiv, damit dein Test sauber laeuft
         const data = [
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Aufhängeplan YAG", page: "11-12" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Flug: Dehli -> Abu Dhabi #Ticket", page: "38" },
@@ -165,9 +165,9 @@
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96" }
         ];
 
-        // Definiere fest, welche Bilddateien du fuer Buch 1 hochgeladen hast (ohne "seite_", nur die Nummern!)
-        // Ergaenze hier einfach die Liste, falls du mehr hochgeladen hast (z.B. '11', '12', '38', '60'...)
-        const buch1Bilder = ['11', '38', '60', '65', '66', '96'];
+        // HIER NUR DIE SEITEN EINTRAGEN, DIE TATSÄCHLICH ALS BILD VORHANDEN SIND!
+        // Wenn du z.B. für Seite 11 und 38 ein Bild hast, für den Rest nicht, schreibst du hier: ['11', '38']
+        const buch1Bilder = ['3', '5', '10', '11', '38', '60', '65', '66']; 
 
         function switchTab(view) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -201,7 +201,6 @@
             const imgElement = document.getElementById(`img-${rowId}`);
             const ersteSeite = extrahiereErsteSeite(seiteString);
             
-            // Direkter Pfad ohne JSON-Abhaegigkeit. Versucht klein geschriebenen Ordner, bei Fehler gross geschrieben.
             imgElement.onerror = function() {
                 imgElement.src = `Buch1/bilder/${ersteSeite}.jpg`;
                 imgElement.onerror = null; 
@@ -246,7 +245,7 @@
                         const rowId = `${buchId}-${uniqueID}-${index}`;
                         const ersteSeite = extrahiereErsteSeite(item.page);
                         
-                        // Prueft, ob die Zahl im buch1Bilder-Array oben existiert
+                        // Prüft jetzt dynamisch, ob das Bild wirklich existiert
                         const hatBild = buch1Bilder.includes(ersteSeite);
                         
                         const rowClass = hatBild ? 'clickable-row' : '';
@@ -317,7 +316,6 @@
 
         document.getElementById('searchInput').addEventListener('input', e => renderRegister(e.target.value));
         
-        // Initialer Start
         renderRegister();
     </script>
 </body>
