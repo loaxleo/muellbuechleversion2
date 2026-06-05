@@ -65,7 +65,7 @@
 let currentTab = 'list';
 // Deine komplette Datenbank (gefüllt mit allen Einträgen aus inhalt.txt)
 const data = [
-   { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Eintrittskarte #FlatzMuseum #Dornbirn #Zeichnung", page: "5" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Knife Block", page: "10" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Aufhängeplan YAG", page: "11" },
@@ -73,7 +73,8 @@ const data = [
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Fredi 60er #Zeichnung #Sketchbook", page: "60" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Sketchbook Day 001 #Zeichnung #Sketchbook", page: "65" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Wookrock Festival, Stand mit Tobi #Zirkus", page: "66" },
-    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Theoriekurs #Easydrivers #Auto", page: "96" },
+    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Theoriekurs #Easydrivers #Auto", page: "96-112" },
+    
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "\"Talentekinder\" Nachricht von Alfons #Brief", page: "54" },
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "An der Ach mit #Helene #Zeichnung #Sketchbook", page: "73" },
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "Arschkarte bei Otto am 21. Geburtstag #Zettel", page: "90" },
@@ -81,6 +82,7 @@ const data = [
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "#Opa&Oma Garten #Zeichnung #Sketchbook", page: "98" },
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "Tutti Frutti Box #Zeichnung #Blueprint", page: "102" },
     { id: "buch2", book: "Buch 2: Juli-September 25", text: "Museumsbesuch mit #Papa in #Basel", page: "122" },
+    
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Fashion #Zeichnung #Sketchbook", page: "7" },
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Tic-Tac-Toe mit #Flo, #Finja & #Leonie", page: "11" },
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Ultimate Tic-Tac-Toe mit #Flo", page: "13" },
@@ -96,6 +98,7 @@ const data = [
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Hand #Zeichnung #Sketchbook", page: "90" },
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Mathe 101 #fsj", page: "97" },
     { id: "buch3", book: "Buch 3: Sept-Okt 25", text: "Opas Brille #Opa&Oma #Zeichnung", page: "103" },
+    
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "\"Schneller Lauf\" #Aufführung", page: "11" },
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Sketchbook Day 100", page: "11" },
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "erster Solo-Trip nach #Wien", page: "17" },
@@ -114,6 +117,7 @@ const data = [
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "PH Feldkirch Exkursion #fsj", page: "99" },
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Zeichnung vo Lina #fsj #Zettel", page: "105" },
     { id: "buch4", book: "Buch 4: Okt-Dez 25", text: "Weihnachten Zirkushalle #Zirkus", page: "112" },
+    
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Korg Volca Sample 2 - Factory Samples", page: "5" },
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Rubik's Pyraminx #SolutionGuide", page: "8" },
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Spitzenschachtel für #Mademoiselle", page: "35" },
@@ -125,6 +129,7 @@ const data = [
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Sockenpuppe #fsj #Zeichnung", page: "88" },
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Semesterkonferenz VS Fischbach", page: "96" },
     { id: "buch5", book: "Buch 5: Dez-Feb 26", text: "Sketchbook Day 200", page: "113" },
+    
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "Tanger", page: "1" },
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "Faschingsdienstag mit #Edith #Zirkus", page: "2" },
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "Fridolin 18 #Film", page: "57" },
@@ -141,6 +146,7 @@ const data = [
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "#Apple AirPods #Zeichnung", page: "109" },
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "Jojos Flaschenbox #fsj #Zeichnung", page: "111" },
     { id: "buch6", book: "Buch 6: Feb-März 26", text: "Hospiz Vlbg #fsj #Mitschrift", page: "116" },
+    
     { id: "buch7", book: "Buch 7: März-Mai 26", text: "Malbuch vo Lara #fsj #Geschenk", page: "4" },
     { id: "buch7", book: "Buch 7: März-Mai 26", text: "musikalische Mittagspause #Ticket", page: "14" },
     { id: "buch7", book: "Buch 7: März-Mai 26", text: "Schwein #fsj #Zeichnung", page: "18" },
