@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Müllbüchle Archiv</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #fafafa; }
+    .buch-eintrag { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    summary { font-weight: bold; cursor: pointer; padding: 10px; background: #eee; border-radius: 4px; }
+    .bilder-container, .all-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 15px 0; }
+    img { width: 100%; height: 150px; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
+    img:hover { transform: scale(1.04); }
+    hr { border: 0; height: 1px; background: #ccc; margin: 40px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Mein Müllbüchle Archiv</h1>
+
+  <section class="buch-eintrag">
+    <h2>Müllbüchle Band 1</h2>
+    <p>Hier stehen deine Notizen, welche wichtigen Seiten wo zu finden sind.</p>
+    
+    <details class="bilder-galerie">
+      <summary>Skizzen einblenden</summary>
+      <div class="bilder-container" id="galerie-buch1">
+        </div>
+    </details>
+  </section>
+
+  <hr>
+
+  <section>
+    <h2>Alle Bilder auf einen Blick</h2>
+    <div class="all-images-grid" id="alle-bilder-grid">
+      </div>
+  </section>
+
+  <script>
+    // Das Python-Skript wird uns gleich eine Datei namens "bilder_liste.json" erstellen.
+    // Diese laden wir hier einfach rein.
+    async function ladeGalerie() {
+      try {
+        const response = await fetch('buch1/bilder_liste.json');
+        const bilder = await response.json();
+        
+        const galerieContainer = document.getElementById('galerie-buch1');
+        const allesGrid = document.getElementById('alle-bilder-grid');
+
+        bilder.forEach(bildName => {
+          const bildPfad = `buch1/bilder/${bildName}`;
+
+          // 1. Bild für das Aufklapp-Menü erstellen
+          const img1 = document.createElement('img');
+          img1.src = bildPfad;
+          img1.loading = "lazy";
+          galerieContainer.appendChild(img1);
+
+          // 2. Bild für das große Gesamt-Archiv erstellen
+          const img2 = document.createElement('img');
+          img2.src = bildPfad;
+          img2.loading = "lazy";
+          allesGrid.appendChild(img2);
+        });
+
+      } catch (e) {
+        console.log("Noch keine Bilderliste vorhanden oder Fehler:", e);
+      }
+    }
+
+    // Direkt beim Start ausführen
+    ladeGalerie();
+  </script>
+</body>
+</html>
