@@ -1,59 +1,110 @@
-<script>
-    // ... (dein data-Array bleibt wie gehabt)
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müllbüachle Register</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #f5f5f5;
+            --text-sub: #909090;
+            --border: #2d2d2d;
+        }
+        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .view-section { width: 100%; max-width: 800px; }
+        .book-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+        .book-header { padding: 15px 20px; font-weight: 700; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        .clickable-row { cursor: pointer; }
+        .clickable-row:hover { background: rgba(255,255,255,0.05); }
+        td { padding: 12px 20px; border-top: 1px solid var(--border); }
+        .page-col { width: 80px; text-align: right; color: var(--text-sub); }
+        .preview-row { display: none; background: rgba(0,0,0,0.3); }
+        .preview-container { text-align: center; padding: 10px; }
+        .preview-container img { max-width: 100%; height: auto; border-radius: 4px; }
+    </style>
+</head>
+<body>
 
-    // Die Funktion sucht jetzt in: buch1/bilder/3.jpg
-    function versucheBildZuLaden(imgElement, buchId, bildNummer) {
-        // Der Pfad ist nun fix auf deinen Ordner "bilder" eingestellt
-        const pfad = `./${buchId}/bilder/${bildNummer}.jpg`;
-        
-        imgElement.onerror = function() {
-            // Falls mal ein Bild doch nicht .jpg ist, hier als Fallback 
-            // oder einfach das Bild unsichtbar machen, wenn nicht gefunden
-            this.style.display = 'none'; 
+    <div id="contentArea" class="view-section"></div>
+
+    <script>
+        // Dein Daten-Array
+        const data = [
+            // ... (Hier kommen deine Daten-Einträge wie bisher)
+            { year: 2025, book: "Buch 1: März - Juli", id: "buch1", text: "Taschenrechner #FlatzMuseum", page: "3" },
+            { year: 2025, book: "Buch 2: Juli - Sept", id: "buch2", text: "\"Talentekinder\" Nachricht", page: "54" }
+            // HINWEIS: Füge hier alle anderen Einträge ein
+        ];
+
+        // Definiere hier, für welche Seite ein Bild existiert
+        const bildListen = {
+            buch1: ['3', '5', '10', '11'],
+            buch2: ['54', '73', '90']
+            // HINWEIS: Ergänze hier alle Seiten, für die du im Ordner "bilder" ein .jpg hast
         };
 
-        imgElement.src = pfad;
-    }
-
-    // Stelle sicher, dass die toggleBildVorschau und rendereReineBildergalerie 
-    // diese neue Funktion benutzen (wie im Code unten gezeigt):
-
-    function toggleBildVorschau(rowId, buchId, gefundeneBilder) {
-        const previewRow = document.getElementById(`preview-${rowId}`);
-        if (!previewRow) return;
-
-        if (previewRow.style.display === 'table-row') {
-            previewRow.style.display = 'none';
-            return;
+        // Die korrigierte Pfad-Logik für deine Ordnerstruktur
+        function versucheBildZuLaden(imgElement, buchId, bildNummer) {
+            // Pfad-Struktur: ./buch1/bilder/3.jpg
+            const pfad = `./${buchId}/bilder/${bildNummer}.jpg`;
+            imgElement.src = pfad;
+            imgElement.onerror = function() {
+                this.style.display = 'none'; // Bild ausblenden, falls Datei nicht existiert
+            };
         }
 
-        document.querySelectorAll('.preview-row').forEach(r => r.style.display = 'none');
-        
-        const wrapper = document.getElementById(`wrapper-${rowId}`);
-        wrapper.innerHTML = "";
+        function toggleBildVorschau(rowId, buchId, bildNummer) {
+            const previewRow = document.getElementById(`preview-${rowId}`);
+            if (previewRow.style.display === 'table-row') {
+                previewRow.style.display = 'none';
+            } else {
+                document.querySelectorAll('.preview-row').forEach(r => r.style.display = 'none');
+                const wrapper = document.getElementById(`wrapper-${rowId}`);
+                wrapper.innerHTML = `<div class="preview-container"><img src="" alt="Seite ${bildNummer}"></div>`;
+                versucheBildZuLaden(wrapper.querySelector('img'), buchId, bildNummer);
+                previewRow.style.display = 'table-row';
+            }
+        }
 
-        gefundeneBilder.forEach(bildNummer => {
-            const container = document.createElement('div');
-            container.className = 'preview-container';
+        function render() {
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = "";
             
-            const img = document.createElement('img');
-            img.alt = `Seite ${bildNummer}`;
-            img.loading = "lazy";
+            // Gruppiere nach Büchern
+            const books = [...new Set(data.map(item => item.id))];
             
-            // Hier wird jetzt der korrekte Pfad mit /bilder/ gesetzt
-            versucheBildZuLaden(img, buchId, bildNummer);
+            books.forEach(bId => {
+                const bookData = data.filter(item => item.id === bId);
+                const section = document.createElement('div');
+                section.className = 'book-section';
+                section.innerHTML = `<div class="book-header">${bookData[0].book}</div><table><tbody></tbody></table>`;
+                const tbody = section.querySelector('tbody');
 
-            const label = document.createElement('div');
-            label.className = 'image-label';
-            label.innerText = `Seite ${bildNummer}`;
+                bookData.forEach((item, index) => {
+                    const rowId = `${bId}-${index}`;
+                    const hatBild = bildListen[bId] && bildListen[bId].includes(item.page);
+                    
+                    const row = document.createElement('tr');
+                    row.className = hatBild ? 'clickable-row' : '';
+                    if(hatBild) row.onclick = () => toggleBildVorschau(rowId, bId, item.page);
+                    
+                    row.innerHTML = `<td>${item.text} ${hatBild ? '🖼️' : ''}</td><td class="page-col">S. ${item.page}</td>`;
+                    tbody.appendChild(row);
 
-            container.appendChild(img);
-            container.appendChild(label);
-            wrapper.appendChild(container);
-        });
+                    const preview = document.createElement('tr');
+                    preview.className = 'preview-row';
+                    preview.id = `preview-${rowId}`;
+                    preview.innerHTML = `<td colspan="2"><div id="wrapper-${rowId}"></div></td>`;
+                    tbody.appendChild(preview);
+                });
+                contentArea.appendChild(section);
+            });
+        }
 
-        previewRow.style.display = 'table-row';
-    }
-    
-    // ... (der Rest des Skripts bleibt gleich)
-</script>
+        render();
+    </script>
+</body>
+</html>
