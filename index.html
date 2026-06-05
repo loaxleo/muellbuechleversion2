@@ -257,7 +257,6 @@
     <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
     <script>
-        // Vollständiger Datensatz für Buch 1, Buch 2 und Buch 3
         const data = [
             // Buch 1
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Taschenrechner #FlatzMuseum#Dornbirn#Zeichnung", page: "3" },
@@ -297,8 +296,10 @@
             { year: 2025, bDe: "Buch 3", id: "buch3", de: "Opas Brille #Opa&Oma #Zeichnung #Sketchbook", page: "103" }
         ];
 
-        // Definierte Bilddateien für Buch 1 (basierend auf deinen Scans)
+        // Die exakten Bildlisten aus deinen Screenshots
         const buch1Bilder = ['3', '5', '10', '11', '38', '60', '65', '66']; 
+        const buch2Bilder = ['54', '73', '90', '98', '102']; // Exakt aus image_99ff23.png
+        const buch3Bilder = ['7', '11', '13', '17', '18', '20', '34', '35', '41', '42', '44', '47', '54', '65', '74', '81', '90', '97', '103']; // Exakt aus image_99feff.png
 
         function switchTab(view) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -314,17 +315,15 @@
             }
         }
 
-        // Filtert Sonderzeichen wie Bindestriche, Kommas oder Semikolons heraus, um die erste Seitenzahl zu erhalten
         function extrahiereErsteSeite(seiteString) {
             return String(seiteString).split(/[-;,]/)[0].trim();
         }
 
         function hatEintragBild(buchId, ersteSeite) {
-            if (buchId === 'buch1') {
-                return buch1Bilder.includes(ersteSeite);
-            }
-            // Für Buch 2 und Buch 3 wird standardmäßig true angenommen (außer bei dem Theoriekurs-Ausreißer in Buch 1)
-            return true;
+            if (buchId === 'buch1') return buch1Bilder.includes(ersteSeite);
+            if (buchId === 'buch2') return buch2Bilder.includes(ersteSeite);
+            if (buchId === 'buch3') return buch3Bilder.includes(ersteSeite);
+            return false;
         }
 
         function toggleBildVorschau(rowId, buchId, seiteString) {
@@ -340,16 +339,9 @@
             
             const imgElement = document.getElementById(`img-${rowId}`);
             const ersteSeite = extrahiereErsteSeite(seiteString);
-            const ordnerName = buchId.toLowerCase(); // Ordnerstruktur angepasst auf dynamisch 'buch1', 'buch2', 'buch3'
+            const ordnerName = buchId.toLowerCase(); 
             
-            imgElement.onerror = function() {
-                // Fallback-Versuch bei Schreibweisen-Abweichungen (z.B. großgeschriebene Ordner)
-                const schoenerOrdner = ordnerName.charAt(0).toUpperCase() + ordnerName.slice(1);
-                imgElement.src = `${schoenerOrdner}/bilder/${ersteSeite}.jpg`;
-                imgElement.onerror = null; 
-            };
             imgElement.src = `${ordnerName}/bilder/${ersteSeite}.jpg`;
-            
             previewRow.style.display = 'table-row';
         }
 
@@ -369,8 +361,6 @@
                 yearSection.innerHTML = `<div class="year-title">${year}</div>`;
                 
                 const yearData = filtered.filter(item => item.year === year);
-                
-                // Gruppierung nach exaktem Buchnamen
                 const bookGroups = yearData.reduce((acc, item) => {
                     if (!acc[item.bDe]) acc[item.bDe] = [];
                     acc[item.bDe].push(item);
@@ -428,42 +418,35 @@
             const grid = document.getElementById('galleryGrid');
             grid.innerHTML = "";
 
-            // Baut die Gesamtgalerie dynamisch aus allen Einträgen auf, die ein Bild besitzen
-            data.forEach(item => {
-                const ersteSeite = extrahiereErsteSeite(item.page);
-                if (!hatEintragBild(item.id, ersteSeite)) return;
+            // Generiert die Galerie-Kacheln dynamisch nur für tatsächlich vorhandene Dateien
+            const renderKacheln = (buchId, bilderArray) => {
+                bilderArray.forEach(bildNummer => {
+                    const container = document.createElement('div');
+                    container.className = 'gallery-item';
+                    
+                    const img = document.createElement('img');
+                    img.loading = "lazy";
+                    img.alt = `Buch ${buchId.replace('buch', '')} S. ${bildNummer}`;
+                    img.src = `${buchId}/bilder/${bildNummer}.jpg`;
 
-                const ordnerName = item.id.toLowerCase();
-                const bildNummer = ersteSeite;
+                    container.appendChild(img);
+                    
+                    const badge = document.createElement('div');
+                    badge.className = 'book-badge';
+                    badge.innerText = buchId.replace('buch', 'Band ');
+                    container.appendChild(badge);
 
-                const container = document.createElement('div');
-                container.className = 'gallery-item';
-                
-                const img = document.createElement('img');
-                img.loading = "lazy";
-                img.alt = `${item.bDe} S. ${bildNummer}`;
-                
-                img.onerror = function() {
-                    const schoenerOrdner = ordnerName.charAt(0).toUpperCase() + ordnerName.slice(1);
-                    img.src = `${schoenerOrdner}/bilder/${bildNummer}.jpg`;
-                    img.onerror = null;
-                };
-                img.src = `${ordnerName}/bilder/${bildNummer}.jpg`;
+                    container.onclick = () => {
+                        window.open(img.src, '_blank');
+                    };
+                    
+                    grid.appendChild(container);
+                });
+            };
 
-                container.appendChild(img);
-                
-                const badge = document.createElement('div');
-                badge.className = 'book-badge';
-                // Kurzer Name für das Badge (z.B. "B. 1", "B. 2")
-                badge.innerText = item.id.replace('buch', 'Band ');
-                container.appendChild(badge);
-
-                container.onclick = () => {
-                    window.open(img.src, '_blank');
-                };
-                
-                grid.appendChild(container);
-            });
+            renderKacheln('buch1', buch1Bilder);
+            renderKacheln('buch2', buch2Bilder);
+            renderKacheln('buch3', buch3Bilder);
         }
 
         const searchInput = document.getElementById('searchInput');
