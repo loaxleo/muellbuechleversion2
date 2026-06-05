@@ -13,14 +13,14 @@
         .title { font-size: 24px; font-weight: bold; }
         .info-block { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; font-size: 0.85em; line-height: 1.6; }
         
-        /* Tabs */
         .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn { flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; text-align: center; }
         .tab-btn.active { background: #333; border-color: #555; }
 
-        /* Suchleiste (unten fixiert) */
-        .search-wrapper { position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 100; }
-        #searchBar { width: 100%; padding: 15px; background: var(--card); border: 1px solid #444; border-radius: 30px; color: white; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        /* Suchleiste zentriert & max-breite */
+        .search-wrapper { position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 100; display: flex; justify-content: center; }
+        .search-inner { width: 100%; max-width: 800px; position: relative; }
+        #searchBar { width: 100%; padding: 15px; background: var(--card); border: 1px solid #444; border-radius: 30px; color: white; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); box-sizing: border-box; }
         #clearBtn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--sub); font-size: 20px; display: none; }
 
         .book-section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
@@ -29,7 +29,11 @@
         td { padding: 12px; border-top: 1px solid var(--border); }
         .page-col { text-align: right; color: var(--sub); width: 60px; }
         
-        /* Nur Bilder Ansicht */
+        .clickable { cursor: pointer; }
+        .clickable:hover { background: rgba(255,255,255,0.05); }
+        .preview-row { display: none; text-align: center; background: #000; }
+        .preview-row img { max-width: 100%; height: auto; padding: 10px; border-radius: 8px; }
+
         .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; padding-top: 10px; }
         .gallery-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
     </style>
@@ -42,9 +46,7 @@
         <div>Leonard Loacker</div>
         <div class="info-block">
             FALLS GEFUNDEN [IF FOUND]:<br>
-            loaleo@gmx.at
-            Nägelesgarten 3, 6850 Dornbirn
-            Österreich [AUSTRIA]
+            loaleo@gmx.at | Nägelesgarten 3, 6850 Dornbirn | Österreich [AUSTRIA]
         </div>
     </header>
 
@@ -54,11 +56,14 @@
     </div>
 
     <div id="app"></div>
-    <div style="height: 80px;"></div> </div>
+    <div style="height: 80px;"></div>
+</div>
 
 <div class="search-wrapper">
-    <input type="text" id="searchBar" placeholder="Suchen..." oninput="filterData()">
-    <span id="clearBtn" onclick="clearSearch()">✕</span>
+    <div class="search-inner">
+        <input type="text" id="searchBar" placeholder="Suchen..." oninput="filterData()">
+        <span id="clearBtn" onclick="clearSearch()">✕</span>
+    </div>
 </div>
 
 <script>
@@ -184,6 +189,7 @@ const available = {
     buch7: ["4", "14", "18", "21", "27", "32", "33", "41", "45", "49", "52", "64", "70", "79", "91", "94", "108", "109", "110",]
 };
 
+
 function switchTab(tab) {
     currentTab = tab;
     document.getElementById('tabList').className = tab === 'list' ? 'tab-btn active' : 'tab-btn';
@@ -199,6 +205,11 @@ function filterData() {
 
 function clearSearch() { document.getElementById('searchBar').value = ""; filterData(); }
 
+function toggle(id) {
+    const row = document.getElementById('prev-' + id);
+    row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+}
+
 function render(filter = "") {
     const app = document.getElementById('app');
     app.innerHTML = "";
@@ -208,10 +219,16 @@ function render(filter = "") {
         bookIds.forEach(bId => {
             const items = data.filter(i => i.id === bId && i.text.toLowerCase().includes(filter));
             if(items.length === 0) return;
+            
             let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
             items.forEach((item, idx) => {
-                const hasImg = available[bId] && available[bId].includes(item.page);
-                html += `<tr><td>${item.text} ${hasImg ? '🖼️' : ''}</td><td class="page-col">S. ${item.page}</td></tr>`;
+                const rowId = bId + idx;
+                const hasImg = available[bId] && available[bId].some(p => item.page.split('-')[0].includes(p) || item.page.includes(p));
+                html += `<tr class="${hasImg ? 'clickable' : ''}" ${hasImg ? `onclick="toggle('${rowId}')"` : ''}>
+                            <td>${item.text} ${hasImg ? '🖼️' : ''}</td>
+                            <td class="page-col">S. ${item.page}</td>
+                         </tr>
+                         ${hasImg ? `<tr id="prev-${rowId}" class="preview-row"><td colspan="2"><img src="./${bId}/bilder/${item.page.split('-')[0]}.jpg" alt="Vorschau"></td></tr>` : ''}`;
             });
             html += `</table></div>`;
             app.innerHTML += html;
@@ -220,7 +237,7 @@ function render(filter = "") {
         let html = '<div class="gallery-grid">';
         bookIds.forEach(bId => {
             available[bId].forEach(p => {
-                html += `<img src="./${bId}/bilder/${p}.jpg" alt="S.${p}">`;
+                html += `<img src="./${bId}/bilder/${p}.jpg" alt="Bild">`;
             });
         });
         html += '</div>';
