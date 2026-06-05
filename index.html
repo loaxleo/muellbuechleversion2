@@ -24,16 +24,52 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 90px; 
         }
 
         header {
             width: 100%;
             max-width: 800px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 5px; }
-        .subtitle { color: var(--text-sub); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.4; }
+        /* Hierarchische Überschriften-Struktur */
+        h1 { 
+            font-size: 2rem; 
+            font-weight: 800; 
+            margin: 0 0 4px 0; 
+            letter-spacing: -0.5px;
+        }
+        h2 { 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            color: var(--text-sub); 
+            margin: 0 0 20px 0; 
+        }
+
+        /* Kompakter Info-Block */
+        .info-block {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-sub);
+        }
+        .info-block strong {
+            color: var(--text-main);
+            display: block;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px 12px;
+        }
 
         .tabs {
             display: flex;
@@ -64,6 +100,7 @@
             position: relative;
             width: 100%; 
             margin-bottom: 25px; 
+            z-index: 1000;
         }
         #searchInput {
             width: 100%;
@@ -89,9 +126,7 @@
             display: none;
             padding: 0;
         }
-        .clear-search:hover {
-            color: var(--text-main);
-        }
+        .clear-search:hover { color: var(--text-main); }
 
         .year-title { font-size: 1.4rem; font-weight: 700; margin: 30px 0 15px 0; }
         .book-section {
@@ -111,18 +146,31 @@
             border-bottom: 1px solid var(--border);
         }
         
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         tr { border-top: 1px solid var(--border); }
         tr:first-child { border-top: none; }
         tr.clickable-row { cursor: pointer; transition: background 0.1s; }
         tr.clickable-row:hover { background: rgba(255,255,255,0.03); }
         
-        td { padding: 12px 20px; font-size: 0.95rem; }
-        .page-col { width: 90px; font-weight: 600; text-align: right; color: var(--text-sub); white-space: nowrap; }
+        td { padding: 12px 20px; font-size: 0.95rem; word-wrap: break-word; }
+        .page-col { width: 75px; font-weight: 600; text-align: right; color: var(--text-sub); white-space: nowrap; }
 
         .preview-row { display: none; background: rgba(0,0,0,0.2); border-top: none !important; }
-        .preview-container { padding: 15px 20px; text-align: center; }
-        .preview-container img { max-width: 100%; max-height: 500px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .preview-row td { padding: 10px 5px !important; }
+        .preview-container { 
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+        .preview-container img { 
+            max-width: 100%; 
+            height: auto;
+            max-height: 75vh; 
+            border-radius: 6px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: block;
+        }
 
         .gallery-grid {
             display: grid;
@@ -146,13 +194,47 @@
         }
 
         .no-results { text-align: center; color: var(--text-sub); margin-top: 40px; }
+
+        @media (max-width: 600px) {
+            body { 
+                padding: 12px; 
+                padding-bottom: 100px; 
+            }
+            h1 { font-size: 1.7rem; }
+            h2 { font-size: 1.1rem; margin-bottom: 15px; }
+            td { padding: 12px 12px; font-size: 0.9rem; }
+            .info-grid { grid-template-columns: 1fr; gap: 4px; }
+            
+            .search-container {
+                position: fixed;
+                bottom: 15px;
+                left: 12px;
+                right: 12px;
+                width: calc(100% - 24px);
+                margin-bottom: 0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+                border-radius: 8px;
+            }
+            #searchInput {
+                border: 1px solid #444;
+                box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Müllbüachle Register | Leonard Loacker</h1>
-        <div class="subtitle">Falls gefunden [if found]: loaleo@gmx.at | Nägelesgarten 3 6850 Dornbirn, Österreich [Austria]</div>
+        <h1>Müllbüachle Register</h1>
+        <h2>Leonard Loacker</h2>
+        
+        <div class="info-block">
+            <strong>Falls gefunden [if found]:</strong>
+            <div class="info-grid">
+                <div><span>📧</span> loaleo@gmx.at</div>
+                <div><span>📍</span> Nägelesgarten 3, 6850 Dornbirn, Österreich [Austria]</div>
+            </div>
+        </div>
     </header>
 
     <div class="tabs">
@@ -177,7 +259,6 @@
     <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
     <script>
-        // Aktualisierte Liste basierend auf deinen neuen Vorgaben
         const data = [
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Taschenrechner #FlatzMuseum#Dornbirn#Zeichnung", page: "3" },
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Eintrittskarte #FlatzMuseum#Dornbirn#Zeichnung", page: "5" },
@@ -190,7 +271,6 @@
             { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96-122" }
         ];
 
-        // Abgleich mit deinen tatsächlichen Dateinamen aus dem Screenshot image_9adc9f.png
         const buch1Bilder = ['3', '5', '10', '11', '38', '60', '65', '66']; 
 
         function switchTab(view) {
@@ -268,8 +348,6 @@
                     let rows = bookGroups[bookName].map((item, index) => {
                         const rowId = `${buchId}-${uniqueID}-${index}`;
                         const ersteSeite = extrahiereErsteSeite(item.page);
-                        
-                        // Prüft, ob das Bild wirklich im Array existiert
                         const hatBild = buch1Bilder.includes(ersteSeite);
                         
                         const rowClass = hatBild ? 'clickable-row' : '';
@@ -338,7 +416,6 @@
             });
         }
 
-        // Steuerung fuer die Suchfunktion und den Loesch-Button
         const searchInput = document.getElementById('searchInput');
         const clearSearchBtn = document.getElementById('clearSearchBtn');
 
