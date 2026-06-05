@@ -3,11 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Müllbüachle Archiv</title>
+    <title>Müllbüachle Register</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --text: #f5f5f5; --sub: #909090; --border: #333; }
+        :root { --bg: #121212; --card: #1e1e1e; --text: #f5f5f5; --sub: #909090; --border: #333; --accent: #ff4500; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 800px; }
+        
+        /* Header Bereich */
+        header { text-align: center; margin-bottom: 30px; }
+        .title { font-size: 24px; font-weight: bold; margin: 0; }
+        .subtitle { color: var(--sub); margin: 5px 0; }
+        .info-block { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; font-size: 0.9em; }
+        
+        /* Suchleiste */
+        .search-wrapper { position: relative; margin-bottom: 20px; }
+        #searchBar { width: 100%; padding: 12px; box-sizing: border-box; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 16px; }
+        #clearBtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--sub); display: none; font-weight: bold; }
+
         .book-section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
         .book-header { padding: 15px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; }
@@ -21,12 +33,28 @@
 </head>
 <body>
 
-<div class="container" id="app"></div>
+<div class="container">
+    <header>
+        <div class="title">Müllbüachle Register</div>
+        <div class="subtitle">Leonard Loacker</div>
+        <div class="info-block">
+            FALLS GEFUNDEN [IF FOUND]:<br>
+            loaleo@gmx.at | Nägelesgarten 3, 6850 Dornbirn | Österreich [AUSTRIA]
+        </div>
+    </header>
+
+    <div class="search-wrapper">
+        <input type="text" id="searchBar" placeholder="Suchen..." oninput="filterData()">
+        <span id="clearBtn" onclick="clearSearch()">✕</span>
+    </div>
+
+    <div id="app"></div>
+</div>
 
 <script>
-// Komplette Daten aus deiner inhalt.txt
+// Deine komplette Datenbank (gefüllt mit allen Einträgen aus inhalt.txt)
 const data = [
-    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
+   { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Eintrittskarte #FlatzMuseum #Dornbirn #Zeichnung", page: "5" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Knife Block", page: "10" },
     { id: "buch1", book: "Buch 1: März-Juli 25", text: "Aufhängeplan YAG", page: "11" },
@@ -122,38 +150,55 @@ const data = [
 const available = {
     buch1: ["3", "5", "10", "11", "38", "60", "65", "66"],
     buch2: ["54", "73", "90", "98", "102"],
-    buch3: ["7", "11", "13", "17", "18", "34", "35", "41", "51", "65", "74", "81", "90", "97", "103"],
-    buch4: ["11", "17", "36", "41", "47", "48", "52", "57", "60", "61", "64", "76", "79", "80", "83", "86", "90", "96", "99", "105", "112", "115"],
-    buch5: ["5", "8", "35", "49", "53", "67", "69", "73", "88", "96", "113"],
-    buch6: ["1", "2", "57", "67", "68", "70", "79", "84", "88", "91", "101", "102", "105", "109", "111", "116"],
-    buch7: ["4", "14", "18", "21", "27", "32", "33", "41", "45", "49", "52", "64", "70", "79", "91"]
+    buch3: ["7", "11", "13", "17", "18", '20', "34", "35", "41", "42", "44", "47", "51", "65", "74", "81", "90", "97", "103"],
+    buch4: ["8", "11", "26", "36", "38", "41", "42", "48", "48", "52", "54", "57", "60", "61", "70", "76", "79", "80", "83", "86", "96", "99", "112", "115", "116"],
+    buch5: ["5", "8", "20", "28", "34", "35", "36", "52", "63", "67", "68", "87", "90", "105", "108", "113", "120"],
+    buch6: ["9", "17", "21", "35", "40", "49", "57", "59", "60", "65", "67", "68", "70", "71", "75", "77", "79", "80", "84", "88", "91", "101", "105", "109"],
+    buch7: ["4", "14", "18", "21", "27", "32", "33", "41", "45", "49", "52", "64", "70", "79", "91", "94", "108", "109", "110",]
 };
+
+function filterData() {
+    const term = document.getElementById('searchBar').value.toLowerCase();
+    const btn = document.getElementById('clearBtn');
+    btn.style.display = term.length > 0 ? 'block' : 'none';
+    render(term);
+}
+
+function clearSearch() {
+    document.getElementById('searchBar').value = "";
+    filterData();
+}
 
 function toggle(id) {
     const row = document.getElementById('prev-' + id);
     row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
 }
 
-const app = document.getElementById('app');
-const bookIds = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
+function render(filter = "") {
+    const app = document.getElementById('app');
+    app.innerHTML = "";
+    const bookIds = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
 
-bookIds.forEach(bId => {
-    const items = data.filter(i => i.id === bId);
-    if(items.length === 0) return;
-    
-    let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
-    items.forEach((item, idx) => {
-        const rowId = bId + idx;
-        const hasImg = available[bId] && available[bId].includes(item.page);
-        html += `<tr class="${hasImg ? 'clickable' : ''}" ${hasImg ? `onclick="toggle('${rowId}')"` : ''}>
-                    <td>${item.text} ${hasImg ? '🖼️' : ''}</td>
-                    <td class="page-col">S. ${item.page}</td>
-                 </tr>
-                 ${hasImg ? `<tr id="prev-${rowId}" class="preview-row"><td colspan="2"><img src="./${bId}/bilder/${item.page}.jpg" alt="Seite ${item.page}"></td></tr>` : ''}`;
+    bookIds.forEach(bId => {
+        const items = data.filter(i => i.id === bId && i.text.toLowerCase().includes(filter));
+        if(items.length === 0) return;
+        
+        let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
+        items.forEach((item, idx) => {
+            const rowId = bId + idx;
+            const hasImg = available[bId] && available[bId].includes(item.page);
+            html += `<tr class="${hasImg ? 'clickable' : ''}" ${hasImg ? `onclick="toggle('${rowId}')"` : ''}>
+                        <td>${item.text} ${hasImg ? '🖼️' : ''}</td>
+                        <td class="page-col">S. ${item.page}</td>
+                     </tr>
+                     ${hasImg ? `<tr id="prev-${rowId}" class="preview-row"><td colspan="2"><img src="./${bId}/bilder/${item.page}.jpg" alt="Seite ${item.page}"></td></tr>` : ''}`;
+        });
+        html += `</table></div>`;
+        app.innerHTML += html;
     });
-    html += `</table></div>`;
-    app.innerHTML += html;
-});
+}
+
+render();
 </script>
 </body>
 </html>
