@@ -359,7 +359,6 @@
             { year: 2026, book: "Buch 7: März - Mai", id: "buch7", text: "Boot von Lara 3b #fsj #Fischbach #Zeichnung #Sketchbook", page: "91" }
         ];
 
-        // FEHLER KORRIGIERT: Keine künstlichen Nullen mehr bei ein- und zweistelligen Seitenzahlen!
         const bildListen = {
             buch1: ['3', '5', '10', '11', '38', '60', '65', '66', '96'],
             buch2: ['54', '73', '90', '95', '98', '102', '122'],
@@ -407,6 +406,22 @@
             });
         }
 
+        // NEU & SMARTER: Versucht nacheinander .jpg, .PNG, .png und .JPG zu laden
+        function setupFallbackMechanismus(imgElement, buchId, bildNummer) {
+            const extensions = ['.jpg', '.PNG', '.png', '.JPG'];
+            let currentIdx = 0;
+
+            imgElement.onerror = function() {
+                currentIdx++;
+                if (currentIdx < extensions.length) {
+                    this.src = `${buchId}/${bildNummer}${extensions[currentIdx]}`;
+                } else {
+                    this.onerror = null; // Stoppt Endlosschleife, falls Bild wirklich fehlt
+                    this.style.display = 'none'; 
+                }
+            };
+        }
+
         function toggleBildVorschau(rowId, buchId, gefundeneBilder) {
             const previewRow = document.getElementById(`preview-${rowId}`);
             if (!previewRow) return;
@@ -426,13 +441,14 @@
                 container.className = 'preview-container';
                 
                 const img = document.createElement('img');
-                img.src = `${buchId}/${bildNummer}.jpg`;
+                setupFallbackMechanismus(img, buchId, bildNummer);
+                img.src = `${buchId}/${bildNummer}.jpg`; // Erster Versuch
                 img.alt = `S. ${bildNummer}`;
                 img.loading = "lazy";
 
                 const label = document.createElement('div');
                 label.className = 'image-label';
-                label.innerText = `Datei: ${bildNummer}.jpg`;
+                label.innerText = `Seite ${bildNummer}`;
 
                 container.appendChild(img);
                 container.appendChild(label);
@@ -454,3 +470,99 @@
             document.getElementById('noResults').style.display = filtered.length ? "none" : "block";
 
             const years = [...new Set(filtered.map(item => item.year))].sort((a, b) => a - b);
+
+            years.forEach(year => {
+                const yearSection = document.createElement('div');
+                yearSection.className = 'year-section';
+                yearSection.innerHTML = `<div class="year-title">${year}</div>`;
+                
+                const yearData = filtered.filter(item => item.year === year);
+                const bookOrder = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
+                
+                bookOrder.forEach(bId => {
+                    const bookData = yearData.filter(item => item.id === bId);
+                    if (bookData.length === 0) return;
+
+                    const bookName = bookData[0].book;
+                    const section = document.createElement('div');
+                    section.className = 'book-section';
+
+                    const rows = bookData.map((item, index) => {
+                        const rowId = `${bId}-${index}`;
+                        const passendeBilder = findeVorhandeneBilder(bId, item.page);
+                        const hatBilder = passendeBilder.length > 0;
+                        
+                        const rowClass = hatBilder ? 'clickable-row' : '';
+                        const clickHandler = hatBilder ? `onclick='toggleBildVorschau("${rowId}", "${bId}", ${JSON.stringify(passendeBilder)})'` : '';
+                        const hinweis = hatBilder ? ' <span style="font-size:0.85rem;">🖼️</span>' : '';
+
+                        return `
+                            <tr class="${rowClass}" ${clickHandler}>
+                                <td>${item.text}${hinweis}</td>
+                                <td class="page-col">S. ${item.page}</td>
+                            </tr>
+                            <tr class="preview-row" id="preview-${rowId}">
+                                <td colspan="2">
+                                    <div class="preview-wrapper" id="wrapper-${rowId}"></div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    section.innerHTML = `
+                        <div class="book-header">${bookName}</div>
+                        <table><tbody>${rows}</tbody></table>
+                    `;
+                    yearSection.appendChild(section);
+                });
+
+                contentArea.appendChild(yearSection);
+            });
+        }
+
+        function rendereReineBildergalerie() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = "";
+
+            const bookOrder = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
+
+            bookOrder.forEach(buchId => {
+                if (!bildListen[buchId]) return;
+                bildListen[buchId].forEach(bildNummer => {
+                    const container = document.createElement('div');
+                    container.className = 'gallery-item';
+                    
+                    const img = document.createElement('img');
+                    setupFallbackMechanismus(img, buchId, bildNummer);
+                    img.loading = "lazy";
+                    img.src = `${buchId}/${bildNummer}.jpg`; // Erster Versuch
+
+                    container.appendChild(img);
+                    
+                    const badge = document.createElement('div');
+                    badge.className = 'book-badge';
+                    badge.innerText = buchId.replace('buch', 'Band ');
+                    container.appendChild(badge);
+
+                    container.onclick = () => { window.open(img.src, '_blank'); };
+                    grid.appendChild(container);
+                });
+            });
+        }
+
+        searchInput.addEventListener('input', e => {
+            document.getElementById('clearSearchBtn').style.display = e.target.value.length > 0 ? 'block' : 'none';
+            render(e.target.value);
+        });
+
+        function clearSearch() {
+            searchInput.value = '';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            render('');
+            searchInput.focus();
+        }
+
+        render();
+    </script>
+</body>
+</html>
