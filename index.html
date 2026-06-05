@@ -5,30 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Müllbüachle Register</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --text: #f5f5f5; --sub: #909090; --border: #333; --accent: #ff4500; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        :root { --bg: #121212; --card: #1e1e1e; --text: #f5f5f5; --sub: #909090; --border: #333; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 800px; }
         
-        /* Header Bereich */
-        header { text-align: center; margin-bottom: 30px; }
-        .title { font-size: 24px; font-weight: bold; margin: 0; }
-        .subtitle { color: var(--sub); margin: 5px 0; }
-        .info-block { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; font-size: 0.9em; }
+        header { text-align: center; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: bold; }
+        .info-block { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 15px; font-size: 0.85em; line-height: 1.6; }
         
-        /* Suchleiste */
-        .search-wrapper { position: relative; margin-bottom: 20px; }
-        #searchBar { width: 100%; padding: 12px; box-sizing: border-box; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 16px; }
-        #clearBtn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--sub); display: none; font-weight: bold; }
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; text-align: center; }
+        .tab-btn.active { background: #333; border-color: #555; }
+
+        /* Suchleiste (unten fixiert) */
+        .search-wrapper { position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 100; }
+        #searchBar { width: 100%; padding: 15px; background: var(--card); border: 1px solid #444; border-radius: 30px; color: white; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        #clearBtn { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--sub); font-size: 20px; display: none; }
 
         .book-section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
-        .book-header { padding: 15px; font-weight: bold; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--border); }
+        .book-header { padding: 12px; font-weight: bold; background: rgba(255,255,255,0.05); }
         table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px 15px; border-top: 1px solid var(--border); }
-        .page-col { text-align: right; color: var(--sub); width: 100px; }
-        .clickable { cursor: pointer; }
-        .clickable:hover { background: rgba(255,255,255,0.05); }
-        .preview-row { display: none; text-align: center; background: #000; }
-        .preview-row img { max-width: 100%; height: auto; padding: 10px; border-radius: 8px; }
+        td { padding: 12px; border-top: 1px solid var(--border); }
+        .page-col { text-align: right; color: var(--sub); width: 60px; }
+        
+        /* Nur Bilder Ansicht */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; padding-top: 10px; }
+        .gallery-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -36,22 +39,28 @@
 <div class="container">
     <header>
         <div class="title">Müllbüachle Register</div>
-        <div class="subtitle">Leonard Loacker</div>
+        <div>Leonard Loacker</div>
         <div class="info-block">
             FALLS GEFUNDEN [IF FOUND]:<br>
             loaleo@gmx.at | Nägelesgarten 3, 6850 Dornbirn | Österreich [AUSTRIA]
         </div>
     </header>
 
-    <div class="search-wrapper">
-        <input type="text" id="searchBar" placeholder="Suchen..." oninput="filterData()">
-        <span id="clearBtn" onclick="clearSearch()">✕</span>
+    <div class="tabs">
+        <div id="tabList" class="tab-btn active" onclick="switchTab('list')">Liste</div>
+        <div id="tabGallery" class="tab-btn" onclick="switchTab('gallery')">Nur Bilder</div>
     </div>
 
     <div id="app"></div>
+    <div style="height: 80px;"></div> </div>
+
+<div class="search-wrapper">
+    <input type="text" id="searchBar" placeholder="Suchen..." oninput="filterData()">
+    <span id="clearBtn" onclick="clearSearch()">✕</span>
 </div>
 
 <script>
+let currentTab = 'list';
 // Deine komplette Datenbank (gefüllt mit allen Einträgen aus inhalt.txt)
 const data = [
    { id: "buch1", book: "Buch 1: März-Juli 25", text: "Taschenrechner #FlatzMuseum #Dornbirn #Zeichnung", page: "3" },
@@ -157,47 +166,49 @@ const available = {
     buch7: ["4", "14", "18", "21", "27", "32", "33", "41", "45", "49", "52", "64", "70", "79", "91", "94", "108", "109", "110",]
 };
 
-function filterData() {
-    const term = document.getElementById('searchBar').value.toLowerCase();
-    const btn = document.getElementById('clearBtn');
-    btn.style.display = term.length > 0 ? 'block' : 'none';
-    render(term);
-}
-
-function clearSearch() {
-    document.getElementById('searchBar').value = "";
+function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tabList').className = tab === 'list' ? 'tab-btn active' : 'tab-btn';
+    document.getElementById('tabGallery').className = tab === 'gallery' ? 'tab-btn active' : 'tab-btn';
     filterData();
 }
 
-function toggle(id) {
-    const row = document.getElementById('prev-' + id);
-    row.style.display = row.style.display === 'table-row' ? 'none' : 'table-row';
+function filterData() {
+    const term = document.getElementById('searchBar').value.toLowerCase();
+    document.getElementById('clearBtn').style.display = term.length > 0 ? 'block' : 'none';
+    render(term);
 }
+
+function clearSearch() { document.getElementById('searchBar').value = ""; filterData(); }
 
 function render(filter = "") {
     const app = document.getElementById('app');
     app.innerHTML = "";
     const bookIds = ["buch1", "buch2", "buch3", "buch4", "buch5", "buch6", "buch7"];
 
-    bookIds.forEach(bId => {
-        const items = data.filter(i => i.id === bId && i.text.toLowerCase().includes(filter));
-        if(items.length === 0) return;
-        
-        let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
-        items.forEach((item, idx) => {
-            const rowId = bId + idx;
-            const hasImg = available[bId] && available[bId].includes(item.page);
-            html += `<tr class="${hasImg ? 'clickable' : ''}" ${hasImg ? `onclick="toggle('${rowId}')"` : ''}>
-                        <td>${item.text} ${hasImg ? '🖼️' : ''}</td>
-                        <td class="page-col">S. ${item.page}</td>
-                     </tr>
-                     ${hasImg ? `<tr id="prev-${rowId}" class="preview-row"><td colspan="2"><img src="./${bId}/bilder/${item.page}.jpg" alt="Seite ${item.page}"></td></tr>` : ''}`;
+    if (currentTab === 'list') {
+        bookIds.forEach(bId => {
+            const items = data.filter(i => i.id === bId && i.text.toLowerCase().includes(filter));
+            if(items.length === 0) return;
+            let html = `<div class="book-section"><div class="book-header">${items[0].book}</div><table>`;
+            items.forEach((item, idx) => {
+                const hasImg = available[bId] && available[bId].includes(item.page);
+                html += `<tr><td>${item.text} ${hasImg ? '🖼️' : ''}</td><td class="page-col">S. ${item.page}</td></tr>`;
+            });
+            html += `</table></div>`;
+            app.innerHTML += html;
         });
-        html += `</table></div>`;
-        app.innerHTML += html;
-    });
+    } else {
+        let html = '<div class="gallery-grid">';
+        bookIds.forEach(bId => {
+            available[bId].forEach(p => {
+                html += `<img src="./${bId}/bilder/${p}.jpg" alt="S.${p}">`;
+            });
+        });
+        html += '</div>';
+        app.innerHTML = html;
+    }
 }
-
 render();
 </script>
 </body>
