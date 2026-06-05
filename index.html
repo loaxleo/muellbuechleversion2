@@ -1,77 +1,407 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Müllbüchle Archiv</title>
-  <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #fafafa; }
-    .buch-eintrag { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    summary { font-weight: bold; cursor: pointer; padding: 10px; background: #eee; border-radius: 4px; }
-    .bilder-container, .all-images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 15px 0; }
-    img { width: 100%; height: 150px; object-fit: cover; border-radius: 6px; cursor: pointer; transition: transform 0.2s; }
-    img:hover { transform: scale(1.04); }
-    hr { border: 0; height: 1px; background: #ccc; margin: 40px 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Müllbüchle Register & Archiv</title>
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #707070;
+            --border: #e5e5e5;
+            --accent: #000000;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --card-bg: #1e1e1e;
+                --text-main: #f5f5f5;
+                --text-sub: #909090;
+                --border: #2d2d2d;
+                --accent: #ffffff;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
+        .subtitle { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px; }
+
+        /* Navigations-Tabs */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 800px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 10px 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .view-section { display: none; width: 100%; max-width: 800px; }
+        .view-section.active { display: block; }
+
+        /* Suchzeile */
+        .search-container { width: 100%; margin-bottom: 25px; }
+        #searchInput {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* Buch-Akkordeon & Tabellen */
+        .year-title { font-size: 1.4rem; font-weight: 700; margin: 30px 0 15px 0; }
+        .book-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .book-header {
+            padding: 15px 20px;
+            font-weight: 700;
+            cursor: pointer;
+            background: rgba(0,0,0,0.01);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .book-content { padding: 0; display: block; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        tr.clickable-row { cursor: pointer; transition: background 0.1s; }
+        tr.clickable-row:hover { background: rgba(0,0,0,0.02); }
+        @media (prefers-color-scheme: dark) { tr.clickable-row:hover { background: rgba(255,255,255,0.02); } }
+        
+        td { padding: 12px 20px; border-top: 1px solid var(--border); font-size: 0.95rem; }
+        .page-col { width: 80px; font-weight: 600; text-align: right; color: var(--text-sub); }
+
+        /* Bild-Vorschau in Zeile */
+        .preview-row { display: none; background: rgba(0,0,0,0.01); }
+        .preview-container { padding: 15px 20px; text-align: center; }
+        .preview-container img { max-width: 100%; max-height: 400px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* Reine Bildergalerie-Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        .gallery-item {
+            aspect-ratio: 1;
+            background: var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-item .book-badge {
+            position: absolute; bottom: 5px; right: 5px; 
+            background: rgba(0,0,0,0.6); color: white; 
+            font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold;
+        }
+
+        .no-results { text-align: center; color: var(--text-sub); margin-top: 40px; }
+    </style>
 </head>
 <body>
 
-  <h1>Mein Müllbüchle Archiv</h1>
+    <header>
+        <h1 id="mainHeader">Müllbüchle Register</h1>
+        <div class="subtitle">Physisches Archiv via NFC-Link</div>
+    </header>
 
-  <section class="buch-eintrag">
-    <h2>Müllbüchle Band 1</h2>
-    <p>Hier stehen deine Notizen, welche wichtigen Seiten wo zu finden sind.</p>
-    
-    <details class="bilder-galerie">
-      <summary>Skizzen einblenden</summary>
-      <div class="bilder-container" id="galerie-buch1">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('register')">Inhalt & Register</button>
+        <button class="tab-btn" onclick="switchTab('gallery')">Nur Bilder</button>
+    </div>
+
+    <div id="registerView" class="view-section active">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Nach Schlagwörtern oder #Hashtags suchen...">
         </div>
-    </details>
-  </section>
+        <div id="contentArea"></div>
+    </div>
 
-  <hr>
+    <div id="galleryView" class="view-section">
+        <div class="gallery-grid" id="galleryGrid">
+            </div>
+    </div>
 
-  <section>
-    <h2>Alle Bilder auf einen Blick</h2>
-    <div class="all-images-grid" id="alle-bilder-grid">
-      </div>
-  </section>
+    <div id="noResults" class="no-results" style="display: none;">Keine Treffer gefunden.</div>
 
-  <script>
-    // Das Python-Skript wird uns gleich eine Datei namens "bilder_liste.json" erstellen.
-    // Diese laden wir hier einfach rein.
-    async function ladeGalerie() {
-      try {
-        const response = await fetch('buch1/bilder_liste.json');
-        const bilder = await response.json();
+    <script>
+        // Deine Originaldaten aus v05index.html (erweitert bis Buch 6/7)
+        const data = [
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Knife Block", page: 10 },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Aufhängeplan YAG", page: "11-12" },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Flug: Dehli -> Abu Dhabi #Ticket", page: 38 },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Fredi 60er #Zeichnung", page: 60 },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Sketchbook Day 001 #Zeichnung", page: 65 },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Wookrock Festival, Stand mit Tobi #Zirkus", page: 66 },
+            { year: 2025, bDe: "Buch 1: März - Juli", id: "buch1", de: "Theoriekurs #Easydrivers#Auto", page: "96-122" },
+
+            { year: 2025, bDe: "Buch 2: Juli - Sept", id: "buch2", de: "\"Talentekinder\" Nachricht von Alfons #Brief", page: 54 },
+            { year: 2025, bDe: "Buch 2: Juli - Sept", id: "buch2", de: "Arschkarte bei Otto am 21. Geburtstag #Zettel", page: 90 },
+            { year: 2025, bDe: "Buch 2: Juli - Sept", id: "buch2", de: "Auto Beleuchtung und Sonstiges am VW Golf #Easydrivers#Auto", page: "95-97" },
+            { year: 2025, bDe: "Buch 2: Juli - Sept", id: "buch2", de: "Tutti Frutti Box #Zeichnung#Blueprint", page: "102-103" },
+            { year: 2025, bDe: "Buch 2: Juli - Sept", id: "buch2", de: "Museumsbesuch mit #Papa in #Basel", page: 122 },
+
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "Tic-Tac-Toe mit #Flo, #Finja & #Leonie; #Zirkus", page: 11 },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "Ultimate Tic-Tac-Toe mit #Flo", page: 13 },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "Ultimate Tic-Tac-Toe #Anleitung #Spiel", page: 17 },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "VS Fischbach Eröffnungskonferenz #Konferenz #Fischbach #fsj", page: "18-22" },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "erste Arbeitswoche #Fischbach #fsj", page: 35 },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "Spaniqué", page: "41-47" },
+            { year: 2025, bDe: "Buch 3: Sept - Okt", id: "buch3", de: "erster & zweiter Stock #Zeichnung #Blueprint #Fischbach #fsj", page: "51-52" },
+
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "\"Schneller Lauf\" #Mademoiselle #Magdalena #Aufführung #MusikgymnasiumFeldkirch", page: 11 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Sketchbook Day 100 #Zeichnung #Sketchbook", page: 11 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "erster Solo-Trip nach #Wien #Zeichnung #Sketchbook", page: "17-27" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "A&O zum Auto #Easydrivers #Auto", page: "36-38" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Paul Koch: \"Beruf(ung) und der Blick auf dich selbst 3\" #fsj #SBOV #Kurs #Mitschrift", page: "41-43" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "vorläufiger Führerschein #Auto #Easydrivers #Zettel", page: 47 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Kreisverkehr Messepark #Auto #Easydrivers #Zeichnung #Blueprint", page: "48-49" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "4x4 Rubik's Master #Rubik's #SolutionGuide", page: "52-55" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Korg Volca Sample 2 #Korg #Keymap", page: 57 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "\"Diabolo-Chaos\" #Zirkus #Zeichnung #Sketchbook", page: 61 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "zweite Konferenz #fsj #Fischbach #Konferenz", page: 64 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Paul Koch: \"Beruf(ung) und der Blick auf dich selbst 4\" #fsj #SBOV #Kurs #Mitschrift", page: "76-77" },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "\"Panda-Pan\" vo Aris (2c) #fsj #Fischbach #Zeichnung #Zettel", page: 80 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Fridolin Maturaball #Ticket", page: 86 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Schneeflocke vo Emma (3b) #fsj #Fischbach #Zettel", page: 90 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "PH Feldkirch Exkursion #fsj #SBOV #Mitschrift", page: 99 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Zeichnung vo Lina (1c) #fsj #Fischbach #Zettel", page: 105 },
+            { year: 2025, bDe: "Buch 4: Okt - Dez", id: "buch4", de: "Weihnachten Zirkushalle #Zirkus #Zettel", page: 112 },
+
+            { year: 2025, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Korg Volca Sample 2 - Factory Samples #Korg", page: 5 },
+            { year: 2025, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Rubik's Pyraminx #Rubik #SolutionGuide", page: "8-9" },
+            { year: 2025, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Spitzenschachtel für #Mademoiselle #Mäggi", page: 35 },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "\"Umgang mit Agression & Verhaltensauffälligkeiten, -muster 1\" #fsj #SBOV #Mitschrift", page: "49-50" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Andrea Bechter-Bär: \"Arbeit mit Menschen mit Beeinträchtigung 1\" #fsj #SBOV #Mitschrift", page: "53-54" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Clownerie Faschingsnummer mit #Edith #Zirkus #fsj #Fischbach", page: "67-68" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "\"Umgang mit Agression & Verhaltensauffälligkeiten, -muster 2\" #fsj #SBOV #Mitschrift", page: "69-70" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "FH Dornbirn #fsj #SBOV #Mitschrift", page: 73 },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Sockenpuppe #fsj #Fischbach #Zeichnung", page: "88-89" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Semesterkonferenz VS Fischbach #fsj #Fischbach #Konferenz", page: "96-97" },
+            { year: 2026, bDe: "Buch 5: Dez - Feb", id: "buch5", de: "Sketchbook Day 200 #Zeichnung #Sketchbook", page: 113 },
+
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Tanger", page: 1 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Faschingsdienstag mit #Edith#Zirkus#fsj#Fischbach", page: "2-3" },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Fridolin 18 #Fridolin#Film", page: "57-61" },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Sockenpuppe #fsj#Fischbach#Anleitung", page: 67 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Video zusammenfügen ohne Reexportation? #Fridolin#Film", page: 68 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Lesen mit 1c #fsj#Fischbach", page: 70 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Nachricht von WirHoch4 #fsj#Fischbach#Zettel", page: 79 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "\"Unterschrift\" Levian (4b) #fsj#Fischbach#Zettel", page: 84 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Flug: Tanger -> Memmingen #Ticket", page: 88 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "\"I Magnum\" #Zeichnung#Sketchbook", page: 91 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Jonglieren? #fsj#Fischbach", page: 102 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "\"Lesende Lara (3b)\" #fsj#Fischbach#Zeichnung # Sketchbook", page: 105 },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Jojos Flaschenbox #fsj#Zeichnung#Sketchbook#Blueprint", page: "111-112" },
+            { year: 2026, bDe: "Buch 6: Feb - März", id: "buch6", de: "Hospiz Vlbg #fsj#SBOV#Mitschrift", page: "116-119" },
+            
+            // Platzhalter für Buch 7 (Ergänze einfach deine Einträge)
+            { year: 2026, bDe: "Buch 7: März - Aktuell", id: "buch7", de: "Neuer Eintrag #Beispiel", page: 1 }
+        ];
+
+        // Speicher für die dynamisch geladenen Bilder-Verzeichnisse aller Bücher
+        let alleBilderListen = {};
+        const verfuegbareBuecher = ['buch1', 'buch2', 'buch3', 'buch4', 'buch5', 'buch6', 'buch7'];
+
+        // Ansichten umschalten (Tab-System)
+        function switchTab(view) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            
+            if(view === 'register') {
+                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+                document.getElementById('registerView').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+                document.getElementById('galleryView').classList.add('active');
+                rendereReineBildergalerie();
+            }
+        }
+
+        // Alle JSON-Bilderlisten im Hintergrund laden
+        async function ladeAlleBilderListen() {
+            for (const bId of verfuegbareBuecher) {
+                try {
+                    const res = await fetch(`${bId}/bilder_liste.json`);
+                    if (res.ok) {
+                        alleBilderListen[bId] = await res.json();
+                    } else {
+                        alleBilderListen[bId] = [];
+                    }
+                } catch (e) {
+                    alleBilderListen[bId] = [];
+                }
+            }
+            renderRegister(); // Initiale Anzeige nach Laden der Listen
+        }
+
+        // Bild-Vorschau bei Klick auf Tabellenzeile ein-/ausblenden
+        function toggleBildVorschau(rowId, buchId, seite) {
+            const previewRow = document.getElementById(`preview-${rowId}`);
+            if (!previewRow) return;
+
+            if (previewRow.style.display === 'table-row') {
+                previewRow.style.display = 'none';
+                return;
+            }
+
+            // Alle anderen Vorschaufenster schließen für besseren Fokus
+            document.querySelectorAll('.preview-row').forEach(r => r.style.display = 'none');
+
+            // Passendes Bild aus der JSON-Liste suchen
+            const dateien = alleBilderListen[buchId] || [];
+            
+            // Such-Logik: Findet ein Bild, das die Seitennummer im Namen hat (z.B. "seite_10.jpg" oder "10.png")
+            // Gibt es kein passendes, nimmt es das erste Bild des Buches als Fallback
+            const saubereSeite = String(seite).split('-')[0].trim();
+            const passendesBild = dateien.find(f => f.includes(`seite_${saubereSeite}`) || f.startsWith(`${saubereSeite}.`) || f.includes(`_${saubereSeite}`)) || dateien[0];
+
+            if (passendesBild) {
+                const imgElement = document.getElementById(`img-${rowId}`);
+                imgElement.src = `${buchId}/bilder/${passendesBild}`;
+                previewRow.style.display = 'table-row';
+            } else {
+                alert("Für dieses Buch/Seite wurden noch keine Bilder hochgeladen.");
+            }
+        }
+
+        // Haupt-Register rendern (Inhaltsverzeichnis + Suche)
+        function renderRegister(filter = "") {
+            const contentArea = document.getElementById('contentArea');
+            contentArea.innerHTML = "";
+            const query = filter.toLowerCase().trim();
+
+            const filtered = data.filter(item => item.de.toLowerCase().includes(query) || item.bDe.toLowerCase().includes(query));
+            document.getElementById('noResults').style.display = filtered.length ? "none" : "block";
+
+            const years = [...new Set(filtered.map(item => item.year))].sort((a, b) => b - a); // Neueste Jahre zuerst
+
+            years.forEach(year => {
+                const yearSection = document.createElement('div');
+                yearSection.className = 'year-section';
+                yearSection.innerHTML = `<div class="year-title">${year}</div>`;
+                
+                const yearData = filtered.filter(item => item.year === year);
+                const bookGroups = yearData.reduce((acc, item) => {
+                    if (!acc[item.bDe]) acc[item.bDe] = [];
+                    acc[item.bDe].push(item);
+                    return acc;
+                }, {});
+
+                let uniqueID = 0;
+                for (const bookName in bookGroups) {
+                    uniqueID++;
+                    const section = document.createElement('div');
+                    section.className = 'book-section';
+                    
+                    const item = bookGroups[bookName][0];
+                    const buchId = item.id;
+
+                    let rows = bookGroups[bookName].map((item, index) => {
+                        const rowId = `${buchId}-${uniqueID}-${index}`;
+                        return `
+                            <tr class="clickable-row" onclick="toggleBildVorschau('${rowId}', '${buchId}', '${item.page}')">
+                                <td>${item.de}</td>
+                                <td class="page-col">S. ${item.page}</td>
+                            </tr>
+                            <tr class="preview-row" id="preview-${rowId}">
+                                <td colspan="2">
+                                    <div class="preview-container">
+                                        <img id="img-${rowId}" src="" alt="Skizzen-Vorschau" loading="lazy">
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    section.innerHTML = `
+                        <div class="book-header">
+                            <span>${bookName}</span>
+                            <span style="font-size:0.8rem; color:var(--text-sub);">⁺ Klick für Bild</span>
+                        </div>
+                        <div class="book-content">
+                            <table><tbody>${rows}</tbody></table>
+                        </div>
+                    `;
+                    yearSection.appendChild(section);
+                }
+                contentArea.appendChild(yearSection);
+            });
+        }
+
+        // Reine Bildergalerie befüllen
+        function rendereReineBildergalerie() {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = "";
+
+            verfuegbareBuecher.forEach(buchId => {
+                const bilder = alleBilderListen[buchId] || [];
+                const bandNummer = buchId.replace("buch", "Band ");
+
+                bilder.forEach(bildName => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                        <img src="${buchId}/bilder/${bildName}" loading="lazy" alt="Skizze">
+                        <div class="book-badge">${bandNummer}</div>
+                    `;
+                    // Bei Klick öffnet sich das Bild im neuen Tab (Simpler Lightbox-Ersatz)
+                    item.onclick = () => window.open(`${buchId}/bilder/${bildName}`, '_blank');
+                    grid.appendChild(item);
+                });
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', e => renderRegister(e.target.value));
         
-        const galerieContainer = document.getElementById('galerie-buch1');
-        const allesGrid = document.getElementById('alle-bilder-grid');
-
-        bilder.forEach(bildName => {
-          const bildPfad = `buch1/bilder/${bildName}`;
-
-          // 1. Bild für das Aufklapp-Menü erstellen
-          const img1 = document.createElement('img');
-          img1.src = bildPfad;
-          img1.loading = "lazy";
-          galerieContainer.appendChild(img1);
-
-          // 2. Bild für das große Gesamt-Archiv erstellen
-          const img2 = document.createElement('img');
-          img2.src = bildPfad;
-          img2.loading = "lazy";
-          allesGrid.appendChild(img2);
-        });
-
-      } catch (e) {
-        console.log("Noch keine Bilderliste vorhanden oder Fehler:", e);
-      }
-    }
-
-    // Direkt beim Start ausführen
-    ladeGalerie();
-  </script>
+        // Starten
+        ladeAlleBilderListen();
+    </script>
 </body>
 </html>
